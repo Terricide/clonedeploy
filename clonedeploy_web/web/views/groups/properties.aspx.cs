@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using Helpers;
 using Models;
 
@@ -18,7 +13,7 @@ public partial class views_groups_properties : BasePages.Groups
 
    protected void PopulateForm()
     {
-        PopulateImagesDdl(ddlHostImage);
+        PopulateImagesDdl(ddlComputerImage);
         PopulateSitesDdl(ddlSite);
         PopulateBuildingsDdl(ddlBuilding);
         PopulateRoomsDdl(ddlRoom);
@@ -26,9 +21,9 @@ public partial class views_groups_properties : BasePages.Groups
        chkDefault.Checked = Convert.ToBoolean(Group.SetDefaultProperties);
         if (_groupProperty != null)
         {
-            ddlHostImage.SelectedValue = _groupProperty.ImageId.ToString();
-            txtHostDesc.Text = _groupProperty.Description;
-            PopulateImageProfilesDdl(ddlImageProfile, Convert.ToInt32(ddlHostImage.SelectedValue));
+            ddlComputerImage.SelectedValue = _groupProperty.ImageId.ToString();
+            txtComputerDesc.Text = _groupProperty.Description;
+            PopulateImageProfilesDdl(ddlImageProfile, Convert.ToInt32(ddlComputerImage.SelectedValue));
             ddlImageProfile.SelectedValue = _groupProperty.ImageProfileId.ToString();
             ddlSite.SelectedValue = _groupProperty.SiteId.ToString();
             ddlBuilding.SelectedValue = _groupProperty.BuildingId.ToString();
@@ -52,10 +47,10 @@ public partial class views_groups_properties : BasePages.Groups
         }
     }
 
-    protected void ddlHostImage_OnSelectedIndexChanged(object sender, EventArgs e)
+    protected void ddlComputerImage_OnSelectedIndexChanged(object sender, EventArgs e)
     {
-        if (ddlHostImage.Text == "Select Image") return;
-        PopulateImageProfilesDdl(ddlImageProfile, Convert.ToInt32(ddlHostImage.SelectedValue));
+        if (ddlComputerImage.Text == "Select Image") return;
+        PopulateImageProfilesDdl(ddlImageProfile, Convert.ToInt32(ddlComputerImage.SelectedValue));
     }
 
     protected void btnSubmit_OnClick(object sender, EventArgs e)
@@ -65,9 +60,9 @@ public partial class views_groups_properties : BasePages.Groups
         var groupProperty = new GroupProperty
         {
             GroupId = Group.Id,
-            ImageId = Convert.ToInt32(ddlHostImage.SelectedValue),
-            ImageProfileId = Convert.ToInt32(ddlHostImage.SelectedValue) == -1 ? -1 : Convert.ToInt32(ddlImageProfile.SelectedValue),
-            Description = txtHostDesc.Text,
+            ImageId = Convert.ToInt32(ddlComputerImage.SelectedValue),
+            ImageProfileId = Convert.ToInt32(ddlComputerImage.SelectedValue) == -1 ? -1 : Convert.ToInt32(ddlImageProfile.SelectedValue),
+            Description = txtComputerDesc.Text,
             SiteId = Convert.ToInt32(ddlSite.SelectedValue),
             BuildingId = Convert.ToInt32(ddlBuilding.SelectedValue),
             RoomId = Convert.ToInt32(ddlRoom.SelectedValue),

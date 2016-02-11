@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
 using System.Web.UI.WebControls;
 using Helpers;
 
@@ -21,22 +17,24 @@ public partial class views_groups_smartcriteria : BasePages.Groups
 
     protected void gvComputers_OnSorting(object sender, GridViewSortEventArgs e)
     {
-        throw new NotImplementedException();
+        
     }
 
     protected void btnTestQuery_OnClick(object sender, EventArgs e)
     {
-        gvComputers.DataSource = BLL.Computer.SearchComputersForUser(CloneDeployCurrentUser.Id, txtContains.Text);
+        gvComputers.DataSource = BLL.Computer.SearchComputersForUser(CloneDeployCurrentUser.Id, Int32.MaxValue, txtContains.Text);
         gvComputers.DataBind();
         lblTotal.Text = gvComputers.Rows.Count + " Result(s)";
     }
 
     protected void btnUpdate_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorizationOrManagedGroup(Authorizations.UpdateGroup,Group.Id); 
         RequiresAuthorization(Authorizations.UpdateSmart);
         var group = Group;
         group.SmartCriteria = txtContains.Text;
-        BLL.Group.UpdateGroup(group);
+        var result = BLL.Group.UpdateGroup(group);
+        EndUserMessage = result.IsValid ? "Successfully Updated Smart Criteria" : result.Message;
         BLL.Group.UpdateSmartMembership(group);
     }
 }

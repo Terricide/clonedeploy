@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using DAL;
 using Helpers;
 
 namespace BLL
@@ -40,6 +39,15 @@ namespace BLL
                 else
                     uow.ComputerBootMenuRepository.Insert(computerBootMenu);
 
+                return uow.Save();
+            }
+        }
+
+        public static bool DeleteComputerBootMenus(int computerId)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                uow.ComputerBootMenuRepository.DeleteRange(x => x.ComputerId == computerId);
                 return uow.Save();
             }
         }
@@ -121,20 +129,20 @@ namespace BLL
             }
         }
 
-        public static string GetHostNonProxyPath(Models.Computer host, bool isActiveOrCustom)
+        public static string GetComputerNonProxyPath(Models.Computer computer, bool isActiveOrCustom)
         {
             var mode = Settings.PxeMode;
-            var pxeHostMac = Utility.MacToPxeMac(host.Mac);
+            var pxeComputerMac = Utility.MacToPxeMac(computer.Mac);
             string path;
 
-            var fileName = isActiveOrCustom ? pxeHostMac : "default";
+            var fileName = isActiveOrCustom ? pxeComputerMac : "default";
 
             if (mode.Contains("ipxe"))
                 path = Settings.TftpPath + "pxelinux.cfg" + Path.DirectorySeparatorChar +
                        fileName + ".ipxe";
             else if (mode.Contains("grub"))
             {
-                fileName = isActiveOrCustom ? pxeHostMac : "grub";
+                fileName = isActiveOrCustom ? pxeComputerMac : "grub";
                 path = Settings.TftpPath + "pxelinux.cfg" + Path.DirectorySeparatorChar +
                        fileName + ".cfg";
             }
@@ -145,9 +153,9 @@ namespace BLL
             return path;
         }
 
-        public static string GetHostProxyPath(Models.Computer host, bool isActiveOrCustom, string proxyType)
+        public static string GetComputerProxyPath(Models.Computer computer, bool isActiveOrCustom, string proxyType)
         {
-            var pxeHostMac = Utility.MacToPxeMac(host.Mac);
+            var pxeComputerMac = Utility.MacToPxeMac(computer.Mac);
             string path = null;
 
 
@@ -155,7 +163,7 @@ namespace BLL
             var efi32File = Settings.ProxyEfi32File;
             var efi64File = Settings.ProxyEfi64File;
 
-            var fileName = isActiveOrCustom ? pxeHostMac : "default";
+            var fileName = isActiveOrCustom ? pxeComputerMac : "default";
             switch (proxyType)
             {
                 case "bios":
@@ -191,7 +199,7 @@ namespace BLL
                         {
                             path = Settings.TftpPath + "proxy" + Path.DirectorySeparatorChar +
                               proxyType + Path.DirectorySeparatorChar + "pxelinux.cfg" +
-                              Path.DirectorySeparatorChar + pxeHostMac + ".cfg";
+                              Path.DirectorySeparatorChar + pxeComputerMac + ".cfg";
 
                         }
                         else

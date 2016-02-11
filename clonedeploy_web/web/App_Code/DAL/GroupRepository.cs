@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
+﻿using System.Collections.Generic;
 using System.Linq;
-using Helpers;
 
 namespace DAL
 {
@@ -17,22 +14,6 @@ namespace DAL
             _context = context;
         }
     
-
-      
-
-     
-
-        public void Import()
-        {
-          throw new Exception("Not Implemented");
-        }
-
-   
-        public List<Models.Computer> SearchSmartHosts(string searchString)
-        {
-         
-            return new List<Models.Computer>();
-        }
 
         public List<Models.Computer> GetGroupMembers(int searchGroupId, string searchString)
         {

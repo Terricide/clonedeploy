@@ -1,7 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using DAL;
-using Helpers;
 
 namespace BLL
 {
@@ -75,7 +73,7 @@ namespace BLL
         {
             var validationResult = new Models.ValidationResult();
 
-            if (string.IsNullOrEmpty(script.Name) || script.Name.All(c => char.IsLetterOrDigit(c) || c == '_'))
+            if (string.IsNullOrEmpty(script.Name) || !script.Name.All(c => char.IsLetterOrDigit(c) || c == '_'))
             {
                 validationResult.IsValid = false;
                 validationResult.Message = "Script Name Is Not Valid";

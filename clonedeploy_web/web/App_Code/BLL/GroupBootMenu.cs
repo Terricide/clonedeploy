@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using DAL;
-using Helpers;
-
-namespace BLL
+﻿namespace BLL
 {
     public class GroupBootMenu
     {
@@ -14,6 +8,23 @@ namespace BLL
             using (var uow = new DAL.UnitOfWork())
             {
                 return uow.GroupBootMenuRepository.GetFirstOrDefault(p => p.GroupId == groupId);
+            }
+        }
+
+        public static void UpdateGroupMemberBootMenus(Models.GroupBootMenu groupBootMenu)
+        {
+            foreach (var computer in BLL.Group.GetGroupMembers(groupBootMenu.GroupId))
+            {
+                var computerBootMenu = new Models.ComputerBootMenu
+                {
+                    ComputerId = computer.Id,
+                    BiosMenu = groupBootMenu.BiosMenu,
+                    Efi32Menu = groupBootMenu.Efi32Menu,
+                    Efi64Menu = groupBootMenu.Efi64Menu
+                };
+
+                BLL.ComputerBootMenu.UpdateComputerBootMenu(computerBootMenu);
+                BLL.ComputerBootMenu.ToggleComputerBootMenu(computer, true);
             }
         }
 
@@ -35,23 +46,20 @@ namespace BLL
               
             }
 
-            foreach (var computer in BLL.Group.GetGroupMembers(groupBootMenu.GroupId))
-            {
-                var computerBootMenu = new Models.ComputerBootMenu
-                {
-                    ComputerId = computer.Id,
-                    BiosMenu = groupBootMenu.BiosMenu,
-                    Efi32Menu = groupBootMenu.Efi32Menu,
-                    Efi64Menu = groupBootMenu.Efi64Menu
-                };
-
-                BLL.ComputerBootMenu.UpdateComputerBootMenu(computerBootMenu);
-                BLL.ComputerBootMenu.ToggleComputerBootMenu(computer, true);
-            }
+            UpdateGroupMemberBootMenus(groupBootMenu);
+           
            
             return true;
         }
 
+        public static bool DeleteGroup(int groupId)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                uow.GroupBootMenuRepository.DeleteRange(x => x.GroupId == groupId);
+                return uow.Save();
+            }
+        }
 
 
     }

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using System.Web.Security;
-using DAL;
 using Helpers;
 using Models;
 
@@ -12,14 +9,13 @@ namespace BLL
     public class User
     {
 
-        public static Models.ValidationResult AddUser(WdsUser user)
+        public static Models.ValidationResult AddUser(CloneDeployUser user)
         {
             using (var uow = new DAL.UnitOfWork())
             {
                 var validationResult = ValidateUser(user, true);
                 if (validationResult.IsValid)
                 {
-                    user.Password = CreatePasswordHash(user.Password, user.Salt);
                     uow.UserRepository.Insert(user);
                     validationResult.IsValid = uow.Save();
                 }
@@ -53,7 +49,40 @@ namespace BLL
             }
         }
 
-        public static WdsUser GetUser(int userId)
+        public static bool IsAdmin(int userId)
+        {
+            var user = GetUser(userId);
+            return user.Membership == "Administrator";
+        }
+
+        public static Models.CloneDeployUser GetUserByToken(string token)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                return uow.UserRepository.GetFirstOrDefault(x => x.Token == token);
+            }
+        }
+
+        public static void SendLockOutEmail(int userId)
+        {
+            //Mail not enabled
+            if (Settings.SmtpEnabled == "0") return;
+
+            var lockedUser = GetUser(userId);
+            foreach (var user in SearchUsers("").Where(x => x.NotifyLockout == 1 && !string.IsNullOrEmpty(x.Email)))
+            {
+                if (user.Membership != "Administrator" && user.Id != userId) continue;
+                var mail = new Helpers.Mail
+                {
+                    MailTo = user.Email,
+                    Body = lockedUser.Name + " Has Been Locked For 15 Minutes Because Of Too Many Failed Login Attempts",
+                    Subject = "User Locked"
+                };
+                mail.Send();
+            }
+        }
+
+        public static CloneDeployUser GetUser(int userId)
         {
             using (var uow = new DAL.UnitOfWork())
             {
@@ -61,7 +90,7 @@ namespace BLL
             }
         }
 
-        public static WdsUser GetUser(string userName)
+        public static CloneDeployUser GetUser(string userName)
         {
             using (var uow = new DAL.UnitOfWork())
             {
@@ -69,7 +98,7 @@ namespace BLL
             }
         }
 
-        public static List<WdsUser> SearchUsers(string searchString)
+        public static List<CloneDeployUser> SearchUsers(string searchString)
         {
             using (var uow = new DAL.UnitOfWork())
             {
@@ -77,16 +106,13 @@ namespace BLL
             }
         }
 
-        public static Models.ValidationResult UpdateUser(WdsUser user, bool updatePassword)
+        public static Models.ValidationResult UpdateUser(CloneDeployUser user)
         {
             using (var uow = new DAL.UnitOfWork())
             {
                 var validationResult = ValidateUser(user, false);
                 if (validationResult.IsValid)
                 {
-                    user.Password = updatePassword
-                        ? CreatePasswordHash(user.Password, user.Salt)
-                        : uow.UserRepository.GetById(user.Id).Password;
                     uow.UserRepository.Update(user, user.Id);
                     validationResult.IsValid = uow.Save();
                 }
@@ -95,27 +121,7 @@ namespace BLL
             }
         }
 
-        public static string CreatePasswordHash(string pwd, string salt)
-        {
-            var saltAndPwd = string.Concat(pwd, salt);
-            var hashedPwd = FormsAuthentication.HashPasswordForStoringInConfigFile(saltAndPwd, "sha1");
-            return hashedPwd;
-        }
-
-        public static string CreateSalt(int byteSize)
-        {
-            var rng = new RNGCryptoServiceProvider();
-            var buff = new byte[byteSize];
-            rng.GetBytes(buff);
-            return Convert.ToBase64String(buff);
-        }
-
-        public static void ImportUsers()
-        {
-            throw new Exception("Not Implemented");
-        }
-
-        public static Models.ValidationResult ValidateUser(Models.WdsUser user, bool isNewUser)
+        public static Models.ValidationResult ValidateUser(Models.CloneDeployUser user, bool isNewUser)
         {
             var validationResult = new Models.ValidationResult();
 

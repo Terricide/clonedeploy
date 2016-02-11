@@ -2,14 +2,14 @@
 
 
 <asp:Content ID="Content1" ContentPlaceHolderID="BreadcrumbSub2" Runat="Server">
-    <li><a href="<%= ResolveUrl("~/views/images/profiles/chooser.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a></li>
+    <li><a href="<%= ResolveUrl("~/views/images/profiles/general.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a></li>
     <li>Task Options</li>
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="SubHelp">
-    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits actions" target="_blank">Help</a>
+    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="ActionsRightSub">
-    <asp:LinkButton ID="btnUpdateTask" runat="server" OnClick="btnUpdateTask_OnClick" Text="Update Task Options" CssClass="submits actions"/>
+    <asp:LinkButton ID="btnUpdateTask" runat="server" OnClick="btnUpdateTask_OnClick" Text="Update Task Options" CssClass="submits actions green"/>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="SubContent2" Runat="Server">
      <script type="text/javascript">
@@ -31,6 +31,16 @@
     <div class="size-8 column">
         <asp:CheckBox ID="chkGlobalNoClock" runat="server" CssClass="textbox"></asp:CheckBox>
     </div>
+    
+      <br class="clear"/>
+    
+    <div class="size-9 column">
+        Web Cancellable
+    </div>
+    <div class="size-8 column">
+        <asp:CheckBox ID="chkWebCancel" runat="server" CssClass="textbox"></asp:CheckBox>
+    </div>
+
     <br class="clear"/>
     
     <div class="size-9 column">

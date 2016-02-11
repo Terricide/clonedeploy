@@ -1,5 +1,4 @@
 ﻿using System;
-using Models;
 
 namespace DAL
 {
@@ -16,7 +15,7 @@ namespace DAL
         private IGenericRepository<Models.GroupMembership> _groupMembershipRepository;
         private IGenericRepository<Models.Image> _imageRepository;
         private IGenericRepository<Models.ImageProfilePartitionLayout> _imageProfilePartitionRepository;
-        private IGenericRepository<Models.ImageProfile> _linuxProfileRepository;
+        private IGenericRepository<Models.ImageProfile> _imageProfileRepository;
         private IGenericRepository<Models.Partition> _partitionRepository;
         private IGenericRepository<Models.PartitionLayout> _partitionLayoutRepository;
         private IGenericRepository<Models.Port> _portRepository;
@@ -31,8 +30,9 @@ namespace DAL
         private IGenericRepository<Models.Setting> _settingRepository;
         private SiteRepository _siteRepository;
         private IGenericRepository<Models.SysprepTag> _sysprepTagRepository;
-        private IGenericRepository<Models.WdsUser> _userRepository;
+        private IGenericRepository<Models.CloneDeployUser> _userRepository;
         private IGenericRepository<Models.BootTemplate> _bootTemplateRepository;
+        private IGenericRepository<Models.CdVersion> _cdVersionRepository;
         private ComputerRepository _computerRepository;
         private IGenericRepository<Models.ImageProfileScript> _imageProfileScriptRepository;
         private IGenericRepository<Models.ImageProfileFileFolder> _imageProfileFileFolderRepository;
@@ -117,9 +117,9 @@ namespace DAL
             get { return _imageProfilePartitionRepository ?? (_imageProfilePartitionRepository = new GenericRepository<Models.ImageProfilePartitionLayout>(_context)); }
         }
 
-        public IGenericRepository<Models.ImageProfile> LinuxProfileRepository
+        public IGenericRepository<Models.ImageProfile> ImageProfileRepository
         {
-            get { return _linuxProfileRepository ?? (_linuxProfileRepository = new GenericRepository<Models.ImageProfile>(_context)); }
+            get { return _imageProfileRepository ?? (_imageProfileRepository = new GenericRepository<Models.ImageProfile>(_context)); }
         }
 
         public IGenericRepository<Models.Partition> PartitionRepository
@@ -172,9 +172,9 @@ namespace DAL
             get { return _sysprepTagRepository ?? (_sysprepTagRepository = new GenericRepository<Models.SysprepTag>(_context)); }
         }
 
-        public IGenericRepository<Models.WdsUser> UserRepository
+        public IGenericRepository<Models.CloneDeployUser> UserRepository
         {
-            get { return _userRepository ?? (_userRepository = new GenericRepository<Models.WdsUser>(_context)); }
+            get { return _userRepository ?? (_userRepository = new GenericRepository<Models.CloneDeployUser>(_context)); }
         }
 
         public IGenericRepository<Models.BootTemplate> BootTemplateRepository
@@ -185,6 +185,11 @@ namespace DAL
         public IGenericRepository<Models.ImageProfileScript> ImageProfileScriptRepository
         {
             get { return _imageProfileScriptRepository ?? (_imageProfileScriptRepository = new GenericRepository<Models.ImageProfileScript>(_context)); }
+        }
+
+        public IGenericRepository<Models.CdVersion> CdVersionRepository
+        {
+            get { return _cdVersionRepository ?? (_cdVersionRepository = new GenericRepository<Models.CdVersion>(_context)); }
         }
 
         public IGenericRepository<Models.ImageProfileFileFolder> ImageProfileFileFolderRepository

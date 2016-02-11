@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace BLL
 {
@@ -21,6 +20,15 @@ namespace BLL
             using (var uow = new DAL.UnitOfWork())
             {
                 uow.UserGroupManagementRepository.DeleteRange(x => x.UserId == userId);
+                return uow.Save();
+            }
+        }
+
+        public static bool DeleteGroup(int groupId)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                uow.UserGroupManagementRepository.DeleteRange(x => x.GroupId == groupId);
                 return uow.Save();
             }
         }

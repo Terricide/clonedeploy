@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI.WebControls;
 using BasePages;
+using Helpers;
 
 public partial class views_images_profiles_sysprep : Images
 {
@@ -23,7 +24,7 @@ public partial class views_images_profiles_sysprep : Images
             if (dataKey == null) continue;
             foreach (var profileSysprep in profileSyspreps)
             {
-                if (profileSysprep.SysprepId == Convert.ToInt16(dataKey.Value))
+                if (profileSysprep.SysprepId == Convert.ToInt32(dataKey.Value))
                 {
 
                     enabled.Checked = true;
@@ -62,25 +63,33 @@ public partial class views_images_profiles_sysprep : Images
 
     protected void btnUpdateSysprep_OnClick(object sender, EventArgs e)
     {
-        BLL.ImageProfileSysprepTag.DeleteImageProfileSysprepTags(ImageProfile.Id);
+        RequiresAuthorizationOrManagedImage(Authorizations.UpdateProfile, Image.Id);
+        var deleteResult = BLL.ImageProfileSysprepTag.DeleteImageProfileSysprepTags(ImageProfile.Id);
+        var checkedCount = 0;
         foreach (GridViewRow row in gvSysprep.Rows)
         {
             var enabled = (CheckBox)row.FindControl("chkEnabled");
             if (enabled == null ) continue;
             if (!enabled.Checked) continue;
+            checkedCount++;
             var dataKey = gvSysprep.DataKeys[row.RowIndex];
             if (dataKey == null) continue;
 
             var profileSysPrep = new Models.ImageProfileSysprepTag
             {
-                SysprepId = Convert.ToInt16(dataKey.Value),
+                SysprepId = Convert.ToInt32(dataKey.Value),
                 ProfileId = ImageProfile.Id,
             };
             var txtPriority = row.FindControl("txtPriority") as TextBox;
             if (txtPriority != null)
                 if (!string.IsNullOrEmpty(txtPriority.Text))
                     profileSysPrep.Priority = Convert.ToInt32(txtPriority.Text);
-            BLL.ImageProfileSysprepTag.AddImageProfileSysprepTag(profileSysPrep);
+            
+            EndUserMessage = BLL.ImageProfileSysprepTag.AddImageProfileSysprepTag(profileSysPrep) ? "Successfully Updated Image Profile" : "Could Not Update Image Profile";
+        }
+        if (checkedCount == 0)
+        {
+            EndUserMessage = deleteResult ? "Successfully Updated Image Profile" : "Could Not Update Image Profile";
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 using BasePages;
-using Models;
+using Helpers;
 
 public partial class views_images_profiles_create : Images
 {
@@ -11,14 +11,21 @@ public partial class views_images_profiles_create : Images
 
     protected void buttonCreateProfile_OnClick(object sender, EventArgs e)
     {
-        var profile = new ImageProfile()
+        RequiresAuthorization(Authorizations.CreateProfile);
+        var defaultProfile = BLL.ImageProfile.SeedDefaultImageProfile();
+        defaultProfile.ImageId = Image.Id;
+        defaultProfile.Name = txtProfileName.Text;
+        defaultProfile.Description = txtProfileDesc.Text;
+        var result = BLL.ImageProfile.AddProfile(defaultProfile);
+        if (result.IsValid)
         {
-            Name = txtProfileName.Text,
-            Description = txtProfileDesc.Text,
-            ImageId = Image.Id
-        };
-        BLL.ImageProfile.AddProfile(profile);
-            Response.Redirect("~/views/images/profiles/chooser.aspx?imageid=" + profile.ImageId + "&profileid=" + profile.Id + "&cat=profiles");
-
+            EndUserMessage = "Successfully Created Image Profile";
+            Response.Redirect("~/views/images/profiles/general.aspx?imageid=" + defaultProfile.ImageId + "&profileid=" +
+                              defaultProfile.Id + "&cat=profiles");
+        }
+        else
+        {
+            EndUserMessage = result.Message;
+        }
     }
 }

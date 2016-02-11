@@ -4,6 +4,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using BasePages;
+using Helpers;
 
 namespace views.images
 {
@@ -47,12 +48,14 @@ namespace views.images
                 var selectedHd = hdrow.RowIndex;
                 var lbl = hdrow.FindControl("lblHDSize") as Label;
                 if (lbl != null)
-                    lbl.Text = BLL.ImageSchema.ImageSizeOnServerForGridView(row.Cells[4].Text, selectedHd.ToString());
+                    lbl.Text = BLL.ImageSchema.ImageSizeOnServerForGridView(row.Cells[5].Text, selectedHd.ToString());
             }
         }
 
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
+            RequiresAuthorization(Authorizations.DeleteImage);
+            var deleteCount = 0;
             foreach (GridViewRow row in gvImages.Rows)
             {
                 var cb = (CheckBox) row.FindControl("chkSelector");
@@ -60,8 +63,9 @@ namespace views.images
                 var dataKey = gvImages.DataKeys[row.RowIndex];
                 if (dataKey == null) continue;
                 var image = BLL.Image.GetImage(Convert.ToInt32(dataKey.Value));
-                BLL.Image.DeleteImage(image);
+                if (BLL.Image.DeleteImage(image).IsValid) deleteCount++;
             }
+            EndUserMessage = "Successfully Deleted " + deleteCount + " Images";
 
             PopulateGrid();
         }
@@ -95,7 +99,7 @@ namespace views.images
         {
             gvImages.DataSource = BLL.Image.SearchImagesForUser(CloneDeployCurrentUser.Id, txtSearch.Text);
             gvImages.DataBind();
-            lblTotal.Text = gvImages.Rows.Count + " Result(s) / " + BLL.Image.TotalCount() + " Total Image(s)";
+            lblTotal.Text = gvImages.Rows.Count + " Result(s) / " + BLL.Image.ImageCountUser(CloneDeployCurrentUser.Id) + " Total Image(s)";
             PopulateSizes();
         }
 
@@ -104,7 +108,7 @@ namespace views.images
             foreach (GridViewRow row in gvImages.Rows)
             {
                 var lbl = row.FindControl("lblSize") as Label;
-                if (lbl != null) lbl.Text = BLL.ImageSchema.ImageSizeOnServerForGridView(row.Cells[4].Text, "0");
+                if (lbl != null) lbl.Text = BLL.ImageSchema.ImageSizeOnServerForGridView(row.Cells[5].Text, "0");
             }
         }
 

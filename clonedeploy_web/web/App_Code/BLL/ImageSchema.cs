@@ -1,21 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Web;
-using BLL.ClientPartitioning;
+using BLL.DynamicClientPartition;
 using Helpers;
 using Models.ImageSchema;
 using Newtonsoft.Json;
-using Partition;
+
 
 namespace BLL
 {
 
     public class ImageSchema
     {
-        private readonly Models.ImageSchema.GridView.Schema _imageSchema;
+        private readonly Models.ImageSchema.GridView.ImageSchemaGridView _imageSchema;
 
         public ImageSchema(Models.ImageProfile imageProfile, string schemaType, Models.Image image = null)
         {
@@ -60,7 +58,7 @@ namespace BLL
 
             if (!string.IsNullOrEmpty(schema))
             {
-                _imageSchema = JsonConvert.DeserializeObject<Models.ImageSchema.GridView.Schema>(schema);
+                _imageSchema = JsonConvert.DeserializeObject<Models.ImageSchema.GridView.ImageSchemaGridView>(schema);
             }
         }
 
@@ -110,11 +108,11 @@ namespace BLL
         {
             var lvList = new List<Models.ImageSchema.GridView.LogicalVolume>();
 
-            foreach (var partition in _imageSchema.HardDrives[Convert.ToInt16(selectedHd)].Partitions)
+            foreach (var partition in _imageSchema.HardDrives[Convert.ToInt32(selectedHd)].Partitions)
             {
                 if (partition.VolumeGroup.Name == null) continue;
                 if (partition.VolumeGroup.LogicalVolumes == null) continue;
-                var lbs = _imageSchema.HardDrives[Convert.ToInt16(selectedHd)].Lbs;
+                var lbs = _imageSchema.HardDrives[Convert.ToInt32(selectedHd)].Lbs;
                 foreach (var lv in partition.VolumeGroup.LogicalVolumes)
                 {
                     if ((Convert.ToInt64(lv.Size) * lbs ) < 1048576000)
@@ -154,8 +152,9 @@ namespace BLL
 
                 return new List<ImageFileInfo> {imageFileInfo};
             }
-            catch
+            catch(Exception ex)
             {
+                Logger.Log(ex.Message);
                 return null;
             }
         }
@@ -188,7 +187,7 @@ namespace BLL
             }
         }
 
-        public Models.ImageSchema.GridView.Schema GetImageSchema()
+        public Models.ImageSchema.GridView.ImageSchemaGridView GetImageSchema()
         {
             return _imageSchema;
         }

@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
+using Helpers;
 
 public partial class views_global_boottemplates_edit : BasePages.Global
 {
@@ -21,6 +17,7 @@ public partial class views_global_boottemplates_edit : BasePages.Global
 
     protected void btnSubmit_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorization(Authorizations.UpdateGlobal);
         var bootTemplate = new Models.BootTemplate
         {
             Id = BootTemplate.Id,

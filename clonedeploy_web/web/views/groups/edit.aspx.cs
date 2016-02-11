@@ -1,6 +1,6 @@
 ﻿using System;
 using BasePages;
-using BLL;
+using Helpers;
 using Group = Models.Group;
 
 namespace views.groups
@@ -9,6 +9,7 @@ namespace views.groups
     {
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
+            RequiresAuthorizationOrManagedGroup(Authorizations.UpdateGroup, Group.Id); 
             var group = new Group
             {
                 Id = Group.Id,
@@ -17,7 +18,8 @@ namespace views.groups
                 Description = txtGroupDesc.Text,
             };
 
-           BLL.Group.UpdateGroup(group);         
+            var result = BLL.Group.UpdateGroup(group);
+            EndUserMessage = !result.IsValid ? result.Message : "Successfully Updated Group";              
         }
 
         protected void Page_Load(object sender, EventArgs e)
@@ -31,10 +33,6 @@ namespace views.groups
             txtGroupName.Text = Group.Name;
             txtGroupDesc.Text = Group.Description;
             ddlGroupType.Text = Group.Type;
-        }
-
-      
-
-        
+        }   
     }
 }

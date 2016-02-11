@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using BasePages;
-using Helpers;
 
-namespace views.hosts
+namespace views.computers
 {
-    public partial class HostLog : Computers
+    public partial class ComputerLog : Computers
     {
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -32,11 +29,6 @@ namespace views.hosts
             if (dataKey == null) return;
             var log = BLL.ComputerLog.GetComputerLog(Convert.ToInt32(dataKey.Value));
             Export(Computer.Name + "-" + log.SubType + ".txt", log.Contents);
-        }
-
-        protected void gvLogs_OnSorting(object sender, GridViewSortEventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         protected void btnView_OnClick(object sender, EventArgs e)

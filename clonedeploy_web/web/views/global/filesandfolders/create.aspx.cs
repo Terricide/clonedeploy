@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
+using Helpers;
 
 public partial class views_global_filesandfolders_create : BasePages.Global
 {
@@ -12,19 +8,14 @@ public partial class views_global_filesandfolders_create : BasePages.Global
 
     }
 
-    protected void txtType_OnSelectedIndexChanged(object sender, EventArgs e)
-    {
-        displayCheckBox.Visible = ddlType.Text == "Folder";
-    }
-
     protected void btnSubmit_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorization(Authorizations.CreateGlobal);
         var fileFolder = new Models.FileFolder
         {
             Name = txtName.Text,
             Path = txtPath.Text,
-            Type = ddlType.Text,
-            ContentsOnly = Convert.ToInt16(chkContentsOnly.Checked)
+            Type = ddlType.Text
         };
 
         var result = BLL.FileFolder.AddFileFolder(fileFolder);

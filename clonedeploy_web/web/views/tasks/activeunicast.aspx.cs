@@ -1,24 +1,21 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 
-public partial class views_tasks_activeunicast : System.Web.UI.Page
+public partial class views_tasks_activeunicast : BasePages.Tasks
 {
     protected void Page_Load(object sender, EventArgs e)
     {
         if (IsPostBack) return;
         ViewState["clickTracker"] = "1";
-        gvUcTasks.DataSource = BLL.ActiveImagingTask.ReadUnicasts();
-        gvUcTasks.DataBind();
+        PopulateGrid();
+        lblTotal.Text = BLL.ActiveImagingTask.ActiveUnicastCount(CloneDeployCurrentUser.Id) + " Total Unicast(s)";
 
     }
     protected void Timer_Tick(object sender, EventArgs e)
     {
-        gvUcTasks.DataSource = BLL.ActiveImagingTask.ReadUnicasts();
-        gvUcTasks.DataBind();
+        PopulateGrid();
+        lblTotal.Text = BLL.ActiveImagingTask.ActiveUnicastCount(CloneDeployCurrentUser.Id) + " Total Unicast(s)";
         UpdatePanel1.Update();
     }
 
@@ -34,7 +31,12 @@ public partial class views_tasks_activeunicast : System.Web.UI.Page
                 BLL.ActiveImagingTask.DeleteActiveImagingTask(Convert.ToInt32(dataKey.Value));
 
         }
-        gvUcTasks.DataSource = BLL.ActiveImagingTask.ReadUnicasts();
+        PopulateGrid();
+    }
+
+    private void PopulateGrid()
+    {
+        gvUcTasks.DataSource = BLL.ActiveImagingTask.ReadUnicasts(CloneDeployCurrentUser.Id);
         gvUcTasks.DataBind();
     }
 }

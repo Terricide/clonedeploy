@@ -39,11 +39,29 @@ namespace BLL
             }
         }
 
+      
         public static List<Models.ComputerLog> Search(int computerId)
         {
             using (var uow = new DAL.UnitOfWork())
             {
                 return uow.ComputerLogRepository.Get(x => x.ComputerId == computerId, orderBy:(q => q.OrderByDescending(x => x.LogTime)));
+            }
+        }
+
+        public static List<Models.ComputerLog> SearchOnDemand(int limit)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                return uow.ComputerLogRepository.Get(x => x.ComputerId == -1, orderBy: (q => q.OrderByDescending(x => x.LogTime))).Take(limit).ToList();
+            }
+        }
+
+        public static bool DeleteComputerLogs(int computerId)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                uow.ComputerLogRepository.DeleteRange(x => x.ComputerId == computerId);
+                return uow.Save();
             }
         }
     }

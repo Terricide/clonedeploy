@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.ServiceModel.Activities;
 using BasePages;
 using Helpers;
 using Models;
@@ -30,6 +29,7 @@ public partial class views_admin_pxe : Admin
 
     protected void btnUpdateSettings_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorization(Authorizations.UpdateAdmin);
         if (ValidateSettings())
         {
             var listSettings = new List<Setting>
@@ -47,7 +47,7 @@ public partial class views_admin_pxe : Admin
             {
                 if (!new BLL.Workflows.CopyPxeBinaries().CopyFiles())
                 {
-                    EndUserMessage = "Could Not Copy PXE Files";
+                    EndUserMessage = "Could Not Copy PXE Binaries";
                     return;
                 }
                 if ((string) ViewState["proxyDHCP"] != ddlProxyDHCP.Text)
@@ -63,13 +63,17 @@ public partial class views_admin_pxe : Admin
                     newBootMenu = true;
                 }
             }
+            else
+            {
+                EndUserMessage = "Could Not Update PXE Settings";
+            }
 
             if (newBootMenu)
             {
 
-                lblTitle.Text = EndUserMessage;
-                lblTitle.Text +=
-                    "<br> Your Settings Changes Require A New PXE Boot File Be Created.  <br>Go There Now?";
+
+                lblTitle.Text =
+                    "Your Settings Changes Require A New PXE Boot File Be Created.  <br>Go There Now?";
 
                 ClientScript.RegisterStartupScript(GetType(), "modalscript",
                     "$(function() {  var menuTop = document.getElementById('confirmbox'),body = document.body;classie.toggle(menuTop, 'confirm-box-outer-open'); });",
@@ -122,7 +126,7 @@ public partial class views_admin_pxe : Admin
 
     protected bool ValidateSettings()
     {
-        if (BLL.ActiveImagingTask.ReadAll().Count > 0)
+        if (BLL.ActiveImagingTask.AllActiveCountAdmin() > 0)
         {
             EndUserMessage = "Settings Cannot Be Changed While Tasks Are Active";
             return false;

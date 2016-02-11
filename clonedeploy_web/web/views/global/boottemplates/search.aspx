@@ -5,10 +5,10 @@
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="SubHelp" Runat="Server">
-    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits actions" target="_blank">Help</a>
+    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ActionsRightSub" Runat="Server">
-    <a class="confirm" href="#">Delete Selected Templates</a>
+    <a class="confirm actions green" href="#">Delete Selected Templates</a>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="SubContent2" Runat="Server">
@@ -36,7 +36,7 @@
                     <asp:CheckBox ID="chkSelector" runat="server"/>
                 </ItemTemplate>
             </asp:TemplateField>
-            <asp:BoundField DataField="Id" HeaderText="hostID" SortExpression="hostID" Visible="False"/>
+            <asp:BoundField DataField="Id" HeaderText="computerID" SortExpression="computerID" Visible="False"/>
             <asp:BoundField DataField="Name" HeaderText="Name" SortExpression="Name" ItemStyle-CssClass="width_200"></asp:BoundField>
           
           

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace BLL
 {
@@ -18,8 +17,11 @@ namespace BLL
                 else
                 {
                     userLockout.BadLoginCount += 1;
-                    if(userLockout.BadLoginCount == 5)
+                    if (userLockout.BadLoginCount == 5)
+                    {
                         userLockout.LockedUntil = DateTime.UtcNow.AddMinutes(15);
+                        BLL.User.SendLockOutEmail(userId);
+                    }
 
                     uow.UserLockoutRepository.Update(userLockout, userLockout.Id);
                 }

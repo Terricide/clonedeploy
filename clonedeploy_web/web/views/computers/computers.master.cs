@@ -56,20 +56,26 @@ namespace views.computers
             switch (action)
             {
                 case "delete":
-                    ComputerBasePage.RequiresAuthorization(Authorizations.DeleteComputer);
-                    BLL.Computer.DeleteComputer(Computer.Id);
-                    Response.Redirect("~/views/computers/search.aspx");
+                    ComputerBasePage.RequiresAuthorizationOrManagedComputer(Authorizations.DeleteComputer,Computer.Id);
+                    var result = BLL.Computer.DeleteComputer(Computer);
+                    if (result.IsValid)
+                    {
+                        PageBaseMaster.EndUserMessage = "Successfully Deleted Computer";
+                        Response.Redirect("~/views/computers/search.aspx");
+                    }
+                    else
+                        PageBaseMaster.EndUserMessage = result.Message;
                     break;
                 case "push":
                 {
                     ComputerBasePage.RequiresAuthorizationOrManagedComputer(Authorizations.ImageDeployTask, Computer.Id);
-                    PageBaseMaster.EndUserMessage = new BLL.Workflows.Unicast(Computer, action).Start();
+                    PageBaseMaster.EndUserMessage = new BLL.Workflows.Unicast(Computer, action,ComputerBasePage.CloneDeployCurrentUser.Id).Start();
                 }
                     break;
                 case "pull":
                 {
                     ComputerBasePage.RequiresAuthorizationOrManagedComputer(Authorizations.ImageUploadTask, Computer.Id);
-                    PageBaseMaster.EndUserMessage = new BLL.Workflows.Unicast(Computer, action).Start();
+                    PageBaseMaster.EndUserMessage = new BLL.Workflows.Unicast(Computer, action,ComputerBasePage.CloneDeployCurrentUser.Id).Start();
                 }
                     break;
             }

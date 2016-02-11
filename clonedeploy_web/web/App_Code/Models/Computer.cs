@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Data.Entity.Core.Metadata.Edm;
+using CsvHelper.Configuration;
 
 namespace Models
 {
@@ -36,7 +34,7 @@ namespace Models
         public int ImageId { get; set; }
 
         [Column("computer_image_profile_id", Order = 10)]
-        public int ImageProfile { get; set; }
+        public int ImageProfileId { get; set; }
 
         [Column("computer_has_custom_menu", Order = 11)]
         public int CustomBootEnabled { get; set; }
@@ -55,19 +53,26 @@ namespace Models
 
         [Column("custom_attr_5", Order = 16)]
         public string CustomAttribute5 { get; set; }
-      
 
         [NotMapped]
         public virtual Models.ActiveImagingTask ActiveImagingTask { get; set; }
 
         [NotMapped]
         public virtual Models.Image Image { get; set; }
+    }
 
-
-
-     
-
-      
-
+    public sealed class ComputerCsvMap : CsvClassMap<Models.Computer>
+    {
+        public ComputerCsvMap()
+        {
+            Map(m => m.Name).Name("Name");
+            Map(m => m.Mac).Name("Mac");
+            Map(m => m.Description).Name("Description");
+            Map(m => m.CustomAttribute1).Name("CustomAttribute1");
+            Map(m => m.CustomAttribute2).Name("CustomAttribute2");
+            Map(m => m.CustomAttribute3).Name("CustomAttribute3");
+            Map(m => m.CustomAttribute4).Name("CustomAttribute4");
+            Map(m => m.CustomAttribute5).Name("CustomAttribute5");
+        }
     }
 }

@@ -1,15 +1,13 @@
 ﻿<%@ Master Language="C#" MasterPageFile="~/views/Site.master" AutoEventWireup="true" CodeFile="images.master.cs" Inherits="views.masters.ImageMaster" %>
 
-<asp:Content ID="SubNavTitle" ContentPlaceHolderID="HeaderNav" runat="Server">
-    <script type="text/javascript">
-        $(document).ready(function () {
-            $('#nav-images').addClass("nav-current");
-        });
-    </script>
-        <span class="header-title-text">Images</span> 
-</asp:Content>
+
 
 <asp:Content ID="SubNav" ContentPlaceHolderID="SubNav" runat="Server">
+      <script type="text/javascript">
+          $(document).ready(function () {
+              $('#nav-images').addClass("nav-current");
+          });
+    </script>
 
     <div class="sub-nav-top">
         <div id="Level1" runat="server">
@@ -34,10 +32,8 @@
                 <li id="profile">
                     <a  href="<%= ResolveUrl("~/views/images/profiles/search.aspx") %>?imageid=<%= Image.Id %>&cat=profiles"><span class="sub-nav-text">Profiles</span></a>
                 </li>
-                <li id="history">
-                    <a  href="<%= ResolveUrl("~/views/images/history.aspx") %>?imageid=<%= Image.Id %>"><span class="sub-nav-text">History</span></a>
-                </li>
-                <li id="specs">
+               
+                <li id="schema">
                     <a  href="<%= ResolveUrl("~/views/images/schema.aspx") %>?imageid=<%= Image.Id %>"><span class="sub-nav-text">Schema</span></a>
                 </li>
              
@@ -63,18 +59,21 @@
         </asp:ContentPlaceHolder>
 </asp:Content>
 
-<asp:Content runat="server" ID="ActionsLeft" ContentPlaceHolderID="PageActionsLeft">
-   
-    <div id="actions_left" runat="server">
-      <asp:LinkButton ID="btnDelete" runat="server" CssClass="submits actions" OnClick="btnDelete_Click">Delete</asp:LinkButton>
-            <asp:ContentPlaceHolder ID="ActionLeftSub" runat="server"></asp:ContentPlaceHolder>
-    </div>
-</asp:Content>
 
-<asp:Content runat="server" ID="ActionsRight" ContentPlaceHolderID="PageActionsRight">
+<asp:Content runat="server" ID="ActionsRight" ContentPlaceHolderID="PageActions">
     <asp:ContentPlaceHolder ID="SubPageActionsRight" runat="server">
     </asp:ContentPlaceHolder>
+    <div id="actions_left" runat="server">
+      <asp:LinkButton ID="btnDelete" runat="server" CssClass="submits actions" OnClick="btnDelete_Click">Delete Image</asp:LinkButton>
+         <div id="approve" runat="server" Visible="False">
+         <asp:LinkButton ID="btnApproveImage" runat="server" CssClass="submits actions" OnClick="btnApprove_Click">Approve Image</asp:LinkButton>
+    </div>
+            <asp:ContentPlaceHolder ID="ActionLeftSub" runat="server"></asp:ContentPlaceHolder>
+    </div>
+   
+    <div class="help_pos">
      <asp:ContentPlaceHolder ID="Help" runat="server"></asp:ContentPlaceHolder>
+        </div>
 </asp:Content>
 
 <asp:Content ID="MainContent" ContentPlaceHolderID="Content" runat="Server">

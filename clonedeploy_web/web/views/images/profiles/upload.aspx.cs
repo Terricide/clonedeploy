@@ -4,6 +4,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using BasePages;
 using BLL;
+using Helpers;
 using Newtonsoft.Json;
 
 public partial class views_images_profiles_upload : Images
@@ -15,6 +16,12 @@ public partial class views_images_profiles_upload : Images
 
     protected void btnUpdateUpload_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorizationOrManagedImage(Authorizations.UpdateProfile, Image.Id);
+        if (chkCustomUpload.Checked && chkSchemaOnly.Checked)
+        {
+            EndUserMessage = "Custom Schema And Upload Schema Only Cannot Both Be Checked";
+            return;
+        }
         var imageProfile = ImageProfile;
         imageProfile.RemoveGPT = Convert.ToInt16(chkRemoveGpt.Checked);
         imageProfile.SkipShrinkVolumes = Convert.ToInt16(chkUpNoShrink.Checked);
@@ -23,7 +30,8 @@ public partial class views_images_profiles_upload : Images
         imageProfile.Compression = ddlCompAlg.Text;
         imageProfile.CompressionLevel = ddlCompLevel.Text;
         imageProfile.UploadSchemaOnly = Convert.ToInt16(chkSchemaOnly.Checked);
-        BLL.ImageProfile.UpdateProfile(imageProfile);
+        var result = BLL.ImageProfile.UpdateProfile(imageProfile);
+        EndUserMessage = result.IsValid ? "Successfully Updated Image Profile" : result.Message;
     }
 
     protected void chkCustomUpload_OnCheckedChanged(object sender, EventArgs e)

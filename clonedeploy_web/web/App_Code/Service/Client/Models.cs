@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+﻿using System.Collections.Generic;
 
 namespace Services.Client
 {
@@ -14,8 +11,12 @@ namespace Services.Client
     {
         public string Count { get; set; }
         public string FirstProfileId { get; set; }
-        public List<string> ImageProfiles { get; set; } 
-        
+        public List<string> ImageProfiles { get; set; }         
+    }
+
+    public class MulticastList
+    {
+        public List<string> Multicasts { get; set; }
     }
 
     public class CheckIn
@@ -83,5 +84,19 @@ namespace Services.Client
         public string FileSystem { get; set; }
         public string Uuid { get; set; }
         public string ImageType { get; set; }
+    }
+
+    public class FileFolderCopySchema
+    {
+        public string Count { get; set; }
+        public List<FileFolderCopy> FilesAndFolders { get; set; } 
+    }
+
+    public class FileFolderCopy
+    {
+        public string SourcePath { get; set; }
+        public string DestinationFolder { get; set; }
+        public string DestinationPartition { get; set; }
+        public string FolderCopyType { get; set; }
     }
 }

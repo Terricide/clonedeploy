@@ -12,15 +12,46 @@ namespace Helpers
 {
     public class Utility
     {
-        
 
+        public static string EscapeCharacter(string str, string[] charArray)
+        {
+            string escapedString = null;
+            foreach (var c in charArray)
+            {
+                escapedString = str.Replace(c, "\\" + c);
+                str = escapedString;
+            }
+            return escapedString;
+        }
 
         public static string EscapeFilePaths(string path)
         {
             return path != null ? path.Replace(@"\", @"\\") : string.Empty;
         }
 
-        public static string Decode(string encoded)
+        public static string WindowsToUnixFilePath(string path)
+        {
+            return path != null ? path.Replace("\\", "/") : string.Empty;
+        }
+
+        public static string CreatePasswordHash(string pwd, string salt)
+        {
+            var saltAndPwd = string.Concat(pwd, salt);
+            HashAlgorithm hash = new SHA256Managed();
+            byte[] plainTextBytes = System.Text.Encoding.UTF8.GetBytes(saltAndPwd);
+            byte[] hashBytes = hash.ComputeHash(plainTextBytes);
+            return Convert.ToBase64String(hashBytes);
+        }
+
+        public static string CreateSalt(int byteSize)
+        {
+            var rng = new RNGCryptoServiceProvider();
+            var buff = new byte[byteSize];
+            rng.GetBytes(buff);
+            return Convert.ToBase64String(buff);
+        }
+
+        public static string Decode(string encoded, string parameter)
         {
             string decoded = null;
             try
@@ -30,7 +61,7 @@ namespace Helpers
             }
             catch (Exception ex)
             {
-                Logger.Log("Decoding Failed. " + ex.Message);
+                Logger.Log(parameter + " Base64 Decoding Failed. " + ex.Message);
             }
 
             return decoded;
@@ -46,7 +77,7 @@ namespace Helpers
             }
             catch (Exception ex)
             {
-                Logger.Log("Base64 Encoding Failed Failed. " + ex.Message);
+                Logger.Log("Base64 Encoding Failed. " + ex.Message);
             }
 
             return encoded;
@@ -76,15 +107,7 @@ namespace Helpers
 
         public static string GenerateKey()
         {
-            var timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.fff");
-            string key;
-            using (var md5 = MD5.Create())
-            {
-                var hash = md5.ComputeHash(Encoding.Default.GetBytes(timestamp));
-                key = new Guid(hash).ToString();
-            }
-
-            return key.Substring(0, 18);
+            return Guid.NewGuid().ToString();
         }
 
         public static string[] GetBootImages()
@@ -127,7 +150,7 @@ namespace Helpers
 
         public static string[] GetLogs()
         {
-            var logPath = HttpContext.Current.Server.MapPath("~") + Path.DirectorySeparatorChar + "data" +
+            var logPath = HttpContext.Current.Server.MapPath("~") + Path.DirectorySeparatorChar + "private" +
                           Path.DirectorySeparatorChar + "logs" + Path.DirectorySeparatorChar;
 
             var logFiles = Directory.GetFiles(logPath, "*.*");
@@ -140,8 +163,8 @@ namespace Helpers
 
         public static string[] GetScripts(string type)
         {
-            var scriptPath = HttpContext.Current.Server.MapPath("~") + Path.DirectorySeparatorChar + "data" +
-                             Path.DirectorySeparatorChar + "clientscripts" + Path.DirectorySeparatorChar + type +Path.DirectorySeparatorChar;
+            var scriptPath = HttpContext.Current.Server.MapPath("~") + Path.DirectorySeparatorChar + "private" +
+                             Path.DirectorySeparatorChar + "clientscripts" + Path.DirectorySeparatorChar;
             string[] scriptFiles = null;
             try
             {
@@ -173,11 +196,11 @@ namespace Helpers
         public static void WakeUp(string mac)
         {
             var pattern = new Regex("[:]");
-            var wolHostMac = pattern.Replace(mac, "");
+            var wolComputerMac = pattern.Replace(mac, "");
 
             try
             {
-                var value = long.Parse(wolHostMac, NumberStyles.HexNumber, CultureInfo.CurrentCulture.NumberFormat);
+                var value = long.Parse(wolComputerMac, NumberStyles.HexNumber, CultureInfo.CurrentCulture.NumberFormat);
                 var macBytes = BitConverter.GetBytes(value);
 
                 Array.Reverse(macBytes);

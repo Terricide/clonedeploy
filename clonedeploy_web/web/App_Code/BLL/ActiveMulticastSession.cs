@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Management;
 using System.Threading;
-using DAL;
 using Helpers;
 
 namespace BLL
@@ -32,6 +31,33 @@ namespace BLL
                     //Message.Text = "Could Not Create Multicast";
                     return false;
                 }
+            }
+        }
+
+        public static void SendMulticastCompletedEmail(Models.ActiveMulticastSession session)
+        {
+            //Mail not enabled
+            if (Settings.SmtpEnabled == "0") return;
+
+            foreach (var user in BLL.User.SearchUsers("").Where(x => x.NotifyComplete == 1 && !string.IsNullOrEmpty(x.Email)))
+            {
+                if (session.UserId == user.Id)
+                {
+                    var mail = new Helpers.Mail
+                    {
+                        MailTo = user.Email,
+                        Body = session.Name + " Multicast Task Has Completed.",
+                        Subject = "Multicast Completed"
+                    };
+                    mail.Send();
+                }
+            }
+        }
+        public static Models.ActiveMulticastSession GetFromPort(int port)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                return uow.ActiveMulticastSessionRepository.GetFirstOrDefault(x => x.Port == port);
             }
         }
 
@@ -84,6 +110,22 @@ namespace BLL
             }
         }
 
+        public static Models.ActiveMulticastSession Get(int multicastId)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                return uow.ActiveMulticastSessionRepository.GetById(multicastId);
+            }
+        }
+
+        public static List<Models.ActiveMulticastSession> GetOnDemandList()
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                return uow.ActiveMulticastSessionRepository.Get(x => x.ImageProfileId != -1, orderBy: (q => q.OrderBy(t => t.Name)));      
+            }
+        }
+
         public static bool UpdateActiveMulticastSession(Models.ActiveMulticastSession activeMulticastSession)
         {
             using (var uow = new DAL.UnitOfWork())
@@ -93,11 +135,27 @@ namespace BLL
             }
         }
 
-        public static List<Models.ActiveMulticastSession> GetAllMulticastSessions()
+        public static List<Models.ActiveMulticastSession> GetAllMulticastSessions(int userId)
         {
             using (var uow = new DAL.UnitOfWork())
             {
+                if(BLL.User.IsAdmin(userId))
                 return uow.ActiveMulticastSessionRepository.Get(orderBy: (q => q.OrderBy(t => t.Name)));
+                else
+                {
+                    return uow.ActiveMulticastSessionRepository.Get(x => x.UserId == userId, orderBy: (q => q.OrderBy(t => t.Name)));
+                }
+            }
+        }
+
+        public static string ActiveCount(int userId)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                return BLL.User.IsAdmin(userId)
+                    ? uow.ActiveMulticastSessionRepository.Count()
+                    : uow.ActiveMulticastSessionRepository.Count(x => x.UserId == userId);
+
             }
         }
 
@@ -128,7 +186,6 @@ namespace BLL
             catch (Exception ex)
             {
                 Logger.Log(ex.ToString());
-                //Message.Text = "Could Not Kill Process.  Check The Exception Log For More Info";
             }
         }
 
@@ -162,7 +219,6 @@ namespace BLL
             catch (Exception ex)
             {
                 Logger.Log(ex.ToString());
-                //Message.Text = "Could Not Kill Process.  Check The Exception Log For More Info";
             }
         }
     }

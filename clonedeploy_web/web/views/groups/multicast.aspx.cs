@@ -1,16 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 using Helpers;
 
 public partial class views_groups_multicast : BasePages.Groups
 {
     protected void Page_Load(object sender, EventArgs e)
     {
-        RequiresAuthorization(Authorizations.CreateGroup);
+       
 
         if (!IsPostBack) PopulateForm();
     }
@@ -18,22 +13,18 @@ public partial class views_groups_multicast : BasePages.Groups
     protected void PopulateForm()
     {
         PopulateImagesDdl(ddlGroupImage);
-        ddlGroupImage.SelectedValue = Group.Image.ToString();
+        ddlGroupImage.SelectedValue = Group.ImageId.ToString();
         PopulateImageProfilesDdl(ddlImageProfile, Convert.ToInt32(ddlGroupImage.SelectedValue));
-        ddlImageProfile.SelectedValue = Group.ImageProfile.ToString();
-        txtGroupSenderArgs.Text = Group.SenderArguments;
-        txtGroupReceiveArgs.Text = Group.ReceiverArguments;
-
+        ddlImageProfile.SelectedValue = Group.ImageProfileId.ToString();
     }
 
     protected void Submit_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorizationOrManagedGroup(Authorizations.UpdateGroup, Group.Id); 
         var group = Group;
 
-        group.Image = Convert.ToInt32(ddlGroupImage.SelectedValue);
-        group.SenderArguments = txtGroupSenderArgs.Text;
-        group.ReceiverArguments = txtGroupReceiveArgs.Text;
-        group.ImageProfile = Convert.ToInt32(ddlGroupImage.SelectedValue) == -1
+        group.ImageId = Convert.ToInt32(ddlGroupImage.SelectedValue);
+        group.ImageProfileId = Convert.ToInt32(ddlGroupImage.SelectedValue) == -1
                 ? -1 : Convert.ToInt32(ddlImageProfile.SelectedValue);
 
 

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web.UI;
+using BasePages;
 using BLL;
-using BLL.Workflows;
 using Helpers;
 
-public partial class views_admin_bootmenu_defaultmenu : Page
+public partial class views_admin_bootmenu_defaultmenu : Admin
 {
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -19,6 +18,8 @@ public partial class views_admin_bootmenu_defaultmenu : Page
         if (proxyDhcp == "Yes")
         {
             divProxyDHCP.Visible = true;
+            btnSubmitDefaultProxy.Visible = true;
+            btnSubmitDefault.Visible = false;
             var biosFile = Settings.ProxyBiosFile;
             var efi32File = Settings.ProxyEfi32File;
             var efi64File = Settings.ProxyEfi64File;
@@ -31,8 +32,7 @@ public partial class views_admin_bootmenu_defaultmenu : Page
             }
             if (efi64File.Contains("grub"))
                 grubProxyPasses.Visible = true;
-            try
-            {
+          
                 ddlBiosKernel.DataSource = Utility.GetKernels();
                 ddlBiosKernel.DataBind();
                 ddlEfi32Kernel.DataSource = Utility.GetKernels();
@@ -40,25 +40,7 @@ public partial class views_admin_bootmenu_defaultmenu : Page
                 ddlEfi64Kernel.DataSource = Utility.GetKernels();
                 ddlEfi64Kernel.DataBind();
 
-                var itemKernel = ddlBiosKernel.Items.FindByText(Settings.DefaultKernel32);
-                if (itemKernel != null)
-                {
-                    ddlBiosKernel.SelectedValue = Settings.DefaultKernel32;
-                    ddlEfi32Kernel.SelectedValue = Settings.DefaultKernel32;
-                }
-                else
-                {
-                    ddlBiosKernel.Items.Insert(0, "Select Kernel");
-                    ddlEfi32Kernel.Items.Insert(0, "Select Kernel");
-                }
-
-                var itemKernel64 = ddlEfi64Kernel.Items.FindByText(Settings.DefaultKernel64);
-                if (itemKernel64 != null)
-                    ddlEfi64Kernel.SelectedValue = Settings.DefaultKernel64;
-                else
-                    ddlEfi64Kernel.Items.Insert(0, "Select Kernel");
-
-
+              
                 ddlBiosBootImage.DataSource = Utility.GetBootImages();
                 ddlBiosBootImage.DataBind();
                 ddlEfi32BootImage.DataSource = Utility.GetBootImages();
@@ -66,31 +48,13 @@ public partial class views_admin_bootmenu_defaultmenu : Page
                 ddlEfi64BootImage.DataSource = Utility.GetBootImages();
                 ddlEfi64BootImage.DataBind();
 
-                var itemBootImage = ddlBiosBootImage.Items.FindByText("initrd.gz");
-                if (itemBootImage != null)
-                {
-                    ddlBiosBootImage.SelectedValue = "initrd.gz";
-                    ddlEfi32BootImage.SelectedValue = "initrd.gz";
-                }
-                else
-                {
-                    ddlBiosBootImage.Items.Insert(0, "Select Boot Image");
-                    ddlEfi32BootImage.Items.Insert(0, "Select Boot Image");
-                }
-
-                var itemBootImage64 = ddlEfi64BootImage.Items.FindByText("initrd64.gz");
-                if (itemBootImage64 != null)
-                    ddlEfi64BootImage.SelectedValue = "initrd64.gz";
-                else
-                    ddlEfi64BootImage.Items.Insert(0, "Select Boot Image");
-            }
-            catch
-            {
-                // ignored
-            }
+              
+          
         }
         else
         {
+            btnSubmitDefaultProxy.Visible = false;
+            btnSubmitDefault.Visible = true;
             bootPasswords.Visible = true;
             divStandardMode.Visible = true;
             var pxeMode = Settings.PxeMode;
@@ -107,34 +71,14 @@ public partial class views_admin_bootmenu_defaultmenu : Page
                 grubPassBoxes.Visible = true;
                 ipxePassBoxes.Visible = false;
             }
-            try
-            {
-                ddlHostKernel.DataSource = Utility.GetKernels();
-                ddlHostKernel.DataBind();
-                var itemKernel = ddlHostKernel.Items.FindByText(Settings.DefaultKernel32);
-                if (itemKernel != null)
-                    ddlHostKernel.SelectedValue = Settings.DefaultKernel32;
-                else
-                    ddlHostKernel.Items.Insert(0, "Select Kernel");
-            }
-            catch
-            {
-                // ignored
-            }
-            try
-            {
-                ddlHostBootImage.DataSource = Utility.GetBootImages();
-                ddlHostBootImage.DataBind();
-                var itemBootImage = ddlHostBootImage.Items.FindByText("initrd.gz");
-                if (itemBootImage != null)
-                    ddlHostBootImage.SelectedValue = "initrd.gz";
-                else
-                    ddlHostBootImage.Items.Insert(0, "Select Boot Image");
-            }
-            catch
-            {
-                // ignored
-            }
+          
+                ddlComputerKernel.DataSource = Utility.GetKernels();
+                ddlComputerKernel.DataBind();
+               
+           
+                ddlComputerBootImage.DataSource = Utility.GetBootImages();
+                ddlComputerBootImage.DataBind();
+              
         }
     }
 
@@ -142,20 +86,34 @@ public partial class views_admin_bootmenu_defaultmenu : Page
 
     public void btnSubmit_Click(object sender, EventArgs e)
     {
+        RequiresAuthorization(Authorizations.UpdateAdmin);
         if(Settings.ProxyDhcp == "Yes")
             CreateProxyMenu();
         else
             CreateStandardMenu();
+        EndUserMessage = "Complete";
     }
 
     protected void CreateProxyMenu()
     {
+        var listSettings = new List<Models.Setting>
+        {
+            new Models.Setting
+            {
+                Name = "Ipxe Requires Login",
+                Value = chkIpxeProxy.Checked.ToString(),
+                Id = Setting.GetSetting("Ipxe Requires Login").Id
+            },
+        };
+
+        Setting.UpdateSetting(listSettings);
+
         var defaultBootMenu = new BLL.Workflows.DefaultBootMenu
         {
-            DebugPwd = consoleSha.Value,
-            AddPwd = addhostSha.Value,
-            OndPwd = ondsha.Value,
-            DiagPwd = diagsha.Value,
+            DebugPwd = consoleShaProxy.Value,
+            AddPwd = addcomputerShaProxy.Value,
+            OndPwd = ondshaProxy.Value,
+            DiagPwd = diagshaProxy.Value,
             GrubUserName = txtGrubProxyUsername.Text,
             GrubPassword = txtGrubProxyPassword.Text,
         };
@@ -175,40 +133,11 @@ public partial class views_admin_bootmenu_defaultmenu : Page
         defaultBootMenu.Type = "efi64";
         defaultBootMenu.CreateGlobalDefaultBootMenu();
 
-        var listSettings = new List<Models.Setting>
-        {
-            new Models.Setting
-            {
-                Name = "Ipxe Requires Login",
-                Value = chkIpxeProxy.Checked.ToString(),
-                Id = Setting.GetSetting("Ipxe Requires Login").Id
-            },
-        };
-
-        Setting.UpdateSetting(listSettings);
+        
     }
 
     protected void CreateStandardMenu()
     {
-        var defaultBootMenu = new BLL.Workflows.DefaultBootMenu();
-        var pxeMode = Settings.PxeMode;
-        if (pxeMode.Contains("grub"))
-        {
-            defaultBootMenu.GrubUserName = txtGrubUsername.Text;
-            defaultBootMenu.GrubPassword = txtGrubPassword.Text;
-        }
-        else
-        {
-            defaultBootMenu.DebugPwd = consoleSha.Value;
-            defaultBootMenu.AddPwd = addhostSha.Value;
-            defaultBootMenu.OndPwd = ondsha.Value;
-            defaultBootMenu.DiagPwd = diagsha.Value;
-        }
-        defaultBootMenu.Kernel = ddlHostKernel.SelectedValue;
-        defaultBootMenu.BootImage = ddlHostBootImage.SelectedValue;
-        defaultBootMenu.Type = "standard";
-        defaultBootMenu.CreateGlobalDefaultBootMenu();
-
         var listSettings = new List<Models.Setting>
         {
             new Models.Setting
@@ -220,5 +149,26 @@ public partial class views_admin_bootmenu_defaultmenu : Page
         };
 
         Setting.UpdateSetting(listSettings);
+
+        var defaultBootMenu = new BLL.Workflows.DefaultBootMenu();
+        var pxeMode = Settings.PxeMode;
+        if (pxeMode.Contains("grub"))
+        {
+            defaultBootMenu.GrubUserName = txtGrubUsername.Text;
+            defaultBootMenu.GrubPassword = txtGrubPassword.Text;
+        }
+        else
+        {
+            defaultBootMenu.DebugPwd = consoleSha.Value;
+            defaultBootMenu.AddPwd = addcomputerSha.Value;
+            defaultBootMenu.OndPwd = ondsha.Value;
+            defaultBootMenu.DiagPwd = diagsha.Value;
+        }
+        defaultBootMenu.Kernel = ddlComputerKernel.SelectedValue;
+        defaultBootMenu.BootImage = ddlComputerBootImage.SelectedValue;
+        defaultBootMenu.Type = "standard";
+        defaultBootMenu.CreateGlobalDefaultBootMenu();
+
+        
     }
 }

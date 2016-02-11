@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
-using System.Web.UI;
 using System.Web.UI.WebControls;
+using Helpers;
 
 public partial class views_global_filesandfolders_search : BasePages.Global
 {
@@ -50,6 +49,7 @@ public partial class views_global_filesandfolders_search : BasePages.Global
 
     protected void ButtonConfirmDelete_Click(object sender, EventArgs e)
     {
+        RequiresAuthorization(Authorizations.DeleteGlobal);
         foreach (GridViewRow row in gvFiles.Rows)
         {
             var cb = (CheckBox)row.FindControl("chkSelector");

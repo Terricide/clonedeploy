@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Web;
 using BasePages;
 using Helpers;
 using Models;
@@ -19,26 +18,15 @@ public partial class views_admin_email : Admin
         txtSmtpFrom.Text = Settings.SmtpMailFrom;
         txtSmtpTo.Text = Settings.SmtpMailTo;
 
-        if (Settings.NotifySuccessfulLogin == "1")
-            chkLoginSuccess.Checked = true;
-        if (Settings.NotifyFailedLogin == "1")
-            chkLoginFailed.Checked = true;
-        if (Settings.NotifyTaskStarted == "1")
-            chkTaskStarted.Checked = true;
-        if (Settings.NotifyTaskCompleted == "1")
-            chkTaskCompleted.Checked = true;
-        if (Settings.NotifyImageApproved == "1")
-            chkImageApproved.Checked = true;
-        if (Settings.NotifyResizeFailed == "1")
-            chkResizeFailed.Checked = true;
+        if (Settings.SmtpEnabled == "1")
+            chkEnabled.Checked = true;
     }
 
     protected void btnUpdateSettings_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorization(Authorizations.UpdateAdmin);
         List<Setting> listSettings = new List<Setting>
         {
-
-
             new Setting {Name = "Smtp Server", Value = txtSmtpServer.Text, Id = BLL.Setting.GetSetting("Smtp Server").Id},
             new Setting {Name = "Smtp Port", Value = txtSmtpPort.Text, Id = BLL.Setting.GetSetting("Smtp Port").Id},
             new Setting {Name = "Smtp Username", Value = txtSmtpUsername.Text, Id = BLL.Setting.GetSetting("Smtp Username").Id},
@@ -48,30 +36,12 @@ public partial class views_admin_email : Admin
 
         };
         if (!string.IsNullOrEmpty(txtSmtpPassword.Text))
-            listSettings.Add(new Setting { Name = "Smtp Password", Value = txtSmtpPassword.Text, Id = BLL.Setting.GetSetting("Smtp Password").Id });
+            listSettings.Add(new Setting { Name = "Smtp Password Encrypted", Value = new Helpers.Encryption().EncryptText(txtSmtpPassword.Text), Id = BLL.Setting.GetSetting("Smtp Password Encrypted").Id });
 
-        var chkValue = "0";
-        chkValue = chkLoginSuccess.Checked ? "1" : "0";
-        listSettings.Add(new Setting { Name = "Notify Successful Login", Value = chkValue, Id = BLL.Setting.GetSetting("Notify Successful Login").Id });
+        var chkValue = chkEnabled.Checked ? "1" : "0";
+        listSettings.Add(new Setting { Name = "Smtp Enabled", Value = chkValue, Id = BLL.Setting.GetSetting("Smtp Enabled").Id });
 
-        chkValue = chkLoginFailed.Checked ? "1" : "0";
-        listSettings.Add(new Setting { Name = "Notify Failed Login", Value = chkValue, Id = BLL.Setting.GetSetting("Notify Failed Login").Id });
-
-        chkValue = chkTaskStarted.Checked ? "1" : "0";
-        listSettings.Add(new Setting { Name = "Notify Task Started", Value = chkValue, Id = BLL.Setting.GetSetting("Notify Task Started").Id });
-
-        chkValue = chkTaskCompleted.Checked ? "1" : "0";
-        listSettings.Add(new Setting { Name = "Notify Task Completed", Value = chkValue, Id = BLL.Setting.GetSetting("Notify Task Completed").Id });
-
-        chkValue = chkImageApproved.Checked ? "1" : "0";
-        listSettings.Add(new Setting { Name = "Notify Image Approved", Value = chkValue, Id = BLL.Setting.GetSetting("Notify Image Approved").Id });
-
-        chkValue = chkResizeFailed.Checked ? "1" : "0";
-        listSettings.Add(new Setting { Name = "Notify Resize Failed", Value = chkValue, Id = BLL.Setting.GetSetting("Notify Resize Failed").Id });
-
-
-     
-        BLL.Setting.UpdateSetting(listSettings);
+        EndUserMessage = BLL.Setting.UpdateSetting(listSettings) ? "Successfully Updated Settings" : "Could Not Update Settings";
     }
 
     protected void btnTestMessage_Click(object sender, EventArgs e)
@@ -79,9 +49,11 @@ public partial class views_admin_email : Admin
         var mail = new Mail
         {
             Subject = "Test Message",
-            Body = HttpContext.Current.User.Identity.Name
+            Body = "Email Notifications Are Working!",
+            MailTo = Settings.SmtpMailTo
         };
-        mail.Send("Test Message");
 
+        mail.Send();
+        EndUserMessage = "Test Message Sent";
     }
 }

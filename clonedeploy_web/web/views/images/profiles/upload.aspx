@@ -1,15 +1,15 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/views/images/profiles/profiles.master" AutoEventWireup="true" CodeFile="upload.aspx.cs" Inherits="views_images_profiles_upload" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="BreadcrumbSub2" Runat="Server">
-     <li><a href="<%= ResolveUrl("~/views/images/profiles/chooser.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a></li>
+     <li><a href="<%= ResolveUrl("~/views/images/profiles/general.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a></li>
     <li>Upload Options</li>
 </asp:Content>
 
 <asp:Content runat="server" ContentPlaceHolderID="SubHelp">
-    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits actions" target="_blank">Help</a>
+    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="ActionsRightSub">
-    <asp:LinkButton ID="btnUpdateUpload" runat="server" OnClick="btnUpdateUpload_OnClick" Text="Update Upload Options" CssClass="submits actions"/>
+    <asp:LinkButton ID="btnUpdateUpload" runat="server" OnClick="btnUpdateUpload_OnClick" Text="Update Upload Options" CssClass="submits actions green"/>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="SubContent2" Runat="Server">
@@ -43,10 +43,10 @@
     </div>
     <br class="clear"/>
   
-    <div class="size-4 column">
+    <div class="size-9 column">
     Compression Algorithm:
 </div>
-<div class="size-setting column">
+<div class="size-8 column">
     <asp:DropDownList ID="ddlCompAlg" runat="server" CssClass="ddlist">
         <asp:ListItem>gzip</asp:ListItem>
         <asp:ListItem>lz4</asp:ListItem>
@@ -54,11 +54,11 @@
     </asp:DropDownList>
 </div>
 <br class="clear"/>
-<div class="size-4 column">
+<div class="size-9 column">
     Compression Level:
 </div>
 
-<div class="size-setting column">
+<div class="size-8 column">
     <asp:DropDownList ID="ddlCompLevel" runat="server" CssClass="ddlist">
         <asp:ListItem>1</asp:ListItem>
         <asp:ListItem>2</asp:ListItem>
@@ -89,7 +89,6 @@
 
     <br class="clear"/>
 
-<div class="full column">
 <div id="imageSchema" runat="server">
     <asp:GridView ID="gvHDs" runat="server" AutoGenerateColumns="false" CssClass="Gridview" AlternatingRowStyle-CssClass="alt">
         <Columns>
@@ -125,7 +124,7 @@
                                             <asp:CheckBox ID="chkPartActive" runat="server" Checked='<%# Bind("Active") %>'/>
                                         </ItemTemplate>
                                     </asp:TemplateField>
-                                    <asp:BoundField DataField="Prefix" HeaderText="Pre" ItemStyle-CssClass="width_100"></asp:BoundField>
+                                   
                                     <asp:BoundField DataField="Number" HeaderText="#" ItemStyle-CssClass="width_100"></asp:BoundField>
 
                                     <asp:BoundField DataField="Size" HeaderText="Size" ItemStyle-CssClass="width_100"></asp:BoundField>
@@ -222,6 +221,6 @@
         </EmptyDataTemplate>
     </asp:GridView>
 </div>
-    </div>
+
 </asp:Content>
 

@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using Helpers;
 
 namespace DAL
 {
@@ -17,12 +14,7 @@ namespace DAL
             _context = context;
         }
 
-        public void Import()
-        {
-            throw new Exception("Not Implemented");
-        }
-
-        public List<Models.Computer> Get(string searchString)
+        public List<Models.Computer> Search(string searchString, int limit=Int32.MaxValue)
         {
             return (from h in _context.Computers
                     join t in _context.Images on h.ImageId equals t.Id into joined
@@ -40,12 +32,12 @@ namespace DAL
                         Name = x.name,
                         Mac = x.mac,
                         Image = x.image
-                    }).ToList();
+                    }).OrderBy(x => x.Name).Take(limit).ToList();
         }
 
-        public List<Models.Computer> GetComputersWithoutGroup()
+        public List<Models.Computer> GetComputersWithoutGroup(string searchString, int limit=Int32.MaxValue)
         {
-            var list = (from c in _context.Computers
+            var list = (from c in _context.Computers.Where(x => x.Name.Contains(searchString))
 
             join g in _context.GroupMemberships on c.Id equals g.ComputerId into joined
 
@@ -53,7 +45,7 @@ namespace DAL
 
             where j == null
 
-            select c).ToList();
+            select c).OrderBy(x => x.Name).Take(limit).ToList();
            
             return list;
         } 

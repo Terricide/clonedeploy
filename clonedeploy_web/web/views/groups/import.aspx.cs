@@ -1,28 +1,28 @@
 ﻿using System;
 using System.IO;
 using BasePages;
-using BLL;
 using Helpers;
-using Security;
 
 namespace views.groups
 {
     public partial class GroupImport : Groups
     {
-        protected void btnImport_Click(object sender, EventArgs e)
-        {
-            var csvFilePath = Server.MapPath("~") + Path.DirectorySeparatorChar + "data" + Path.DirectorySeparatorChar +
-                              "csvupload" + Path.DirectorySeparatorChar + "groups.csv";
-            FileUpload.SaveAs(csvFilePath);
-            new FileOps().SetUnixPermissions(csvFilePath);
-            BLL.Group.ImportGroups();
-        }
-
         protected void Page_Load(object sender, EventArgs e)
         {
-           
+            RequiresAuthorization(Authorizations.CreateGroup);
             if (IsPostBack) return;
-           
+
         }
+
+        protected void ButtonImport_Click(object sender, EventArgs e)
+        {
+            var csvFilePath = Server.MapPath("~") + Path.DirectorySeparatorChar + "private" + Path.DirectorySeparatorChar +
+                              "imports" + Path.DirectorySeparatorChar + "groups.csv";
+            FileUpload.SaveAs(csvFilePath);
+            new FileOps().SetUnixPermissions(csvFilePath);
+            var successCount = BLL.Group.ImportCsv(csvFilePath,CloneDeployCurrentUser.Id);
+            EndUserMessage = "Successfully Imported " + successCount + " Groups";
+
+        }       
     }
 }

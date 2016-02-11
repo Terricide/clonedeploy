@@ -1,40 +1,37 @@
 ﻿<%@ Master Language="C#" MasterPageFile="~/views/Site.master" AutoEventWireup="true" CodeFile="user.master.cs" Inherits="views.masters.UserMaster" %>
 
-<asp:Content ID="SubNavTitle" ContentPlaceHolderID="HeaderNav" Runat="Server">
+
+<asp:Content ID="SubNav" ContentPlaceHolderID="SubNav" Runat="Server">
     <script type="text/javascript">
-        $(document).ready(function() {
+        $(document).ready(function () {
             $('#nav-users').addClass("nav-current");
         });
     </script>
-        <span class="header-title-text">Users</span> 
-</asp:Content>
 
-<asp:Content ID="SubNav" ContentPlaceHolderID="SubNav" Runat="Server">
-     <div class="sub-nav-top">
         <div id="Level1" runat="server">
         <ul>
-       <li><a id="createuser" href="<%= ResolveUrl("~/views/users/create.aspx") %>"><span class="sub-nav-text">New User</span></a></li>
-       <li>     <a id="searchuser" href="<%= ResolveUrl("~/views/users/search.aspx") %>"><span class="sub-nav-text">Search Users</span></a></li>
-           <li> <a id="importuser" href="<%= ResolveUrl("~/views/users/import.aspx") %>"><span class="sub-nav-text">Import Users</span></a></li>
+       <li id="searchuser">     <a  href="<%= ResolveUrl("~/views/users/search.aspx") %>"><span class="sub-nav-text">Search Users</span></a></li>
+       <li id="createuser"><a  href="<%= ResolveUrl("~/views/users/create.aspx") %>"><span class="sub-nav-text">New User</span></a></li>
+      
        </ul>
         </div>
         
         <div id="Level2" runat="server">
-           <div class="indent">
+
         <ul>
-        <li><a id="editoption" href="<%= ResolveUrl("~/views/users/edit.aspx") %>?userid=<%= CloneDeployUser.Id %>"><span class="sub-nav-text">General</span></a></li>
-        <li><a id="acloption" href="<%= ResolveUrl("~/views/users/acls/general.aspx") %>?userid=<%= CloneDeployUser.Id %>&level=3"><span class="sub-nav-text">Access Control</span></a></li>
-        <li><a id="historyoption" href="<%= ResolveUrl("~/views/users/history.aspx") %>?userid=<%= CloneDeployUser.Id %>"><span class="sub-nav-text">History</span></a></li>
+        <li id="editoption"><a  href="<%= ResolveUrl("~/views/users/edit.aspx") %>?userid=<%= CloneDeployUser.Id %>"><span class="sub-nav-text">General</span></a></li>
+        <li id="acloption"><a  href="<%= ResolveUrl("~/views/users/acls/general.aspx") %>?userid=<%= CloneDeployUser.Id %>&level=3"><span class="sub-nav-text">Access Control</span></a></li>
+       
        
         </ul>
-            </div>
+           
             </div>
 
             <ul>
         <asp:ContentPlaceHolder ID="Level3" runat="server">
         </asp:ContentPlaceHolder>
                 </ul>
-    </div>
+
 </asp:Content>
 
 <asp:Content runat="server" ID="Breadcrumb" ContentPlaceHolderID="Breadcrumb">
@@ -43,18 +40,17 @@
         </asp:ContentPlaceHolder>
 </asp:Content>
 
-<asp:Content runat="server" ID="ActionsLeft" ContentPlaceHolderID="PageActionsLeft">
-   
-    <div id="actions_left" runat="server">
+
+<asp:Content runat="server" ID="ActionsRight" ContentPlaceHolderID="PageActions">
+    <asp:ContentPlaceHolder ID="SubPageActionsRight" runat="server">
+    </asp:ContentPlaceHolder>
+      <div id="actions_left" runat="server">
       <asp:LinkButton ID="btnDelete" runat="server" CssClass="submits actions" Text="Delete User" OnClick="btnDelete_Click"></asp:LinkButton>
             <asp:ContentPlaceHolder ID="ActionLeftSub" runat="server"></asp:ContentPlaceHolder>
     </div>
-</asp:Content>
-
-<asp:Content runat="server" ID="ActionsRight" ContentPlaceHolderID="PageActionsRight">
-    <asp:ContentPlaceHolder ID="SubPageActionsRight" runat="server">
-    </asp:ContentPlaceHolder>
+    <div class="help_pos">
      <asp:ContentPlaceHolder ID="Help" runat="server"></asp:ContentPlaceHolder>
+        </div>
 </asp:Content>
 
 <asp:Content ID="MainContent" ContentPlaceHolderID="Content" Runat="Server">

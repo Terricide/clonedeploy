@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
+using BasePages;
 using Helpers;
 
-public partial class views_admin_bootmenu_editor : System.Web.UI.Page
+public partial class views_admin_bootmenu_editor : Admin
 {
     protected void Page_Load(object sender, EventArgs e)
     {
@@ -20,23 +16,15 @@ public partial class views_admin_bootmenu_editor : System.Web.UI.Page
             try
             {
                 txtGrubSha.Text =
-                    new WebClient().DownloadString("http://docs.cruciblewds.org/grub-pass-gen/encrypt.php?password=" +
+                    new WebClient().DownloadString("http://docs.clonedeploy.org/grub-pass-gen/encrypt.php?password=" +
                                                    txtGrubPass.Text);
                 txtGrubSha.Text = txtGrubSha.Text.Replace("\n \n\n\n", "");
             }
             catch
             {
-                txtGrubSha.Text = "Coud not contact http://cruciblewds.org to encrypt password.";
+                txtGrubSha.Text = "Coud not contact http://clonedeploy.org to encrypt password.";
             }
         }
-
-      
-
-     
-    
-      
-
-      
 
         protected void EditProxy_Changed(object sender, EventArgs e)
         {
@@ -109,11 +97,6 @@ public partial class views_admin_bootmenu_editor : System.Web.UI.Page
             catch (Exception ex)
             {
                 Logger.Log(ex.Message);
-                if (path != null)
-                {
-                    path = path.Replace(@"\", @"\\");
-                    //Message.Text = "Could Not Find " + path;
-                }
             }
         }
 
@@ -121,6 +104,7 @@ public partial class views_admin_bootmenu_editor : System.Web.UI.Page
 
         protected void saveEditor_Click(object sender, EventArgs e)
         {
+            RequiresAuthorization(Authorizations.UpdateAdmin);
             string path = null;
             var tftpPath = Settings.TftpPath;
             var mode = Settings.PxeMode;
@@ -192,13 +176,13 @@ public partial class views_admin_bootmenu_editor : System.Web.UI.Page
                     }
                     new FileOps().SetUnixPermissions(path);
                 }
-                //Message.Text = "Successfully Updated Default Global Boot Menu";
+                EndUserMessage = "Successfully Updated Default Global Boot Menu";
             }
 
             catch (Exception ex)
             {
                 
-                    //Message.Text = "Could Not Update Default Global Boot Menu.  Check The Exception Log For More Info.";
+                    EndUserMessage = "Could Not Update Default Global Boot Menu.  Check The Exception Log For More Info.";
                 Logger.Log(ex.Message);
             }
         }
@@ -286,11 +270,6 @@ public partial class views_admin_bootmenu_editor : System.Web.UI.Page
             catch (Exception ex)
             {
                 Logger.Log(ex.Message);
-                if (path != null)
-                {
-                    path = path.Replace(@"\", @"\\");
-                    //Message.Text = "Could Not Find " + path;
-                }
             }
         }
 

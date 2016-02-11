@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using DAL;
+using CsvHelper;
 using Helpers;
-using Models;
-using Newtonsoft.Json;
-using Partition;
+
 
 namespace BLL
 {
@@ -32,15 +30,19 @@ namespace BLL
             }
             if (validationResult.IsValid)
             {
+                var defaultProfile = BLL.ImageProfile.SeedDefaultImageProfile();
+                defaultProfile.ImageId = image.Id;
+                BLL.ImageProfile.AddProfile(defaultProfile);
+
                 try
                 {
                     Directory.CreateDirectory(Settings.PrimaryStoragePath + "images" + Path.DirectorySeparatorChar + image.Name);
-                    BLL.ImageProfile.SeedDefaultLinuxProfile(image.Id);
+                    
                 }
                 catch (Exception ex)
                 {
                     Logger.Log(ex.Message);
-                    throw;
+                  
                 }                
             }
             return validationResult;
@@ -48,40 +50,47 @@ namespace BLL
 
 
 
-        public static bool DeleteImage(Models.Image image)
+        public static Models.ValidationResult DeleteImage(Models.Image image)
         {
+            var result = new Models.ValidationResult(){IsValid = false};
             using (var uow = new DAL.UnitOfWork())
             {
                 if (Convert.ToBoolean(image.Protected))
                 {
-                    //Message.Text = "This Image Is Protected And Cannot Be Deleted";
-                    return false;
+                    result.Message = "This Image Is Protected And Cannot Be Deleted";
+                    result.IsValid = false;
+                    return result;
                 }
 
                 uow.ImageRepository.Delete(image.Id);
                 if (uow.Save())
                 {
-                    if (string.IsNullOrEmpty(image.Name)) return false;
+                    if (string.IsNullOrEmpty(image.Name)) return result;
+                    BLL.UserImageManagement.DeleteImage(image.Id);
+                    BLL.ImageProfile.DeleteImage(image.Id);
                     try
                     {
                         if (Directory.Exists(Settings.PrimaryStoragePath + "images" + Path.DirectorySeparatorChar + image.Name))
                             Directory.Delete(Settings.PrimaryStoragePath + "images" + Path.DirectorySeparatorChar + image.Name, true);
 
-                        return true;
+                        result.IsValid = true;
                     }
                     catch (Exception ex)
                     {
                         Logger.Log(ex.Message);
-                        //Message.Text = "Could Not Delete Image Folder";
-                        return false;
+                        result.Message = "Could Not Delete Image Folder";
+                        result.IsValid = false;
+
                     }
 
                 }
                 else
                 {
-                    //Message.Text = "Could Not Delete Image";
-                    return false;
+                    result.Message = "Could Not Delete Image";
+                    result.IsValid = false;
                 }
+                return result;
+                
             }
 
         }
@@ -94,6 +103,34 @@ namespace BLL
             }
         }
 
+        public static void SendImageApprovedEmail(int imageId)
+        {
+            //Mail not enabled
+            if (Settings.SmtpEnabled == "0") return;
+
+            var image = BLL.Image.GetImage(imageId);
+            foreach (var user in BLL.User.SearchUsers("").Where(x => x.NotifyImageApproved == 1 && !string.IsNullOrEmpty(x.Email)))
+            {
+                var mail = new Helpers.Mail
+                {
+                    MailTo = user.Email,
+                    Body = image.Name + " Has Been Approved",
+                    Subject = "Image Approved"
+                };
+                mail.Send();
+            }
+        }
+
+        public static string ImageCountUser(int userId)
+        {
+            if (BLL.User.GetUser(userId).Membership == "Administrator")
+                return TotalCount();
+
+            var userManagedImages = BLL.UserImageManagement.Get(userId);
+            
+            //If count is zero image management is not being used return total count
+            return userManagedImages.Count == 0 ? TotalCount() : userManagedImages.Count.ToString();
+        }
 
         public static List<Models.Image> SearchImagesForUser(int userId, string searchString = "")
         {
@@ -126,19 +163,19 @@ namespace BLL
             using (var uow = new DAL.UnitOfWork())
             {
                 if (userId == 0)
-                    return uow.ImageRepository.Get(i => i.IsVisible == 1, orderBy: (q => q.OrderBy(p => p.Name)));
+                    return uow.ImageRepository.Get(i => i.IsVisible == 1 && i.Enabled == 1, orderBy: (q => q.OrderBy(p => p.Name)));
                 else
                 {
                     if (BLL.User.GetUser(userId).Membership == "Administrator")
-                        return uow.ImageRepository.Get(i => i.IsVisible == 1, orderBy: (q => q.OrderBy(p => p.Name)));
+                        return uow.ImageRepository.Get(i => i.IsVisible == 1 && i.Enabled == 1, orderBy: (q => q.OrderBy(p => p.Name)));
 
                     var userManagedImages = BLL.UserImageManagement.Get(userId);
                     if (userManagedImages.Count == 0)
-                        return uow.ImageRepository.Get(i => i.IsVisible == 1, orderBy: (q => q.OrderBy(p => p.Name)));
+                        return uow.ImageRepository.Get(i => i.IsVisible == 1 && i.Enabled == 1, orderBy: (q => q.OrderBy(p => p.Name)));
                     else
                     {
                          var listOfImages = new List<Models.Image>();
-                         listOfImages.AddRange(userManagedImages.Select(managedImage => uow.ImageRepository.GetFirstOrDefault(i => i.IsVisible == 1 && i.Id == managedImage.ImageId)));
+                         listOfImages.AddRange(userManagedImages.Select(managedImage => uow.ImageRepository.GetFirstOrDefault(i => i.IsVisible == 1 && i.Id == managedImage.ImageId && i.Enabled == 1)));
                         return listOfImages;
                     }
                 }
@@ -174,7 +211,7 @@ namespace BLL
                             catch (Exception ex)
                             {
                                 Logger.Log(ex.Message);
-                                throw;
+                                
                             }
                         }
                         else
@@ -209,61 +246,7 @@ namespace BLL
             return string.Join("", sha.Hash.Select(x => x.ToString("x2")));
         }
 
-        public static bool Check_Checksum(Models.Image image)
-        {
-            if (Settings.ImageChecksum != "On") return true;
-            try
-            {
-                var listPhysicalImageChecksums = new List<HdChecksum>();
-                var path = Settings.PrimaryStoragePath + image.Name;
-                var imageChecksum = new HdChecksum
-                {
-                    HdNumber = "hd1",
-                    Path = path
-                };
-                listPhysicalImageChecksums.Add(imageChecksum);
-                for (var x = 2; ; x++)
-                {
-                    imageChecksum = new HdChecksum();
-                    var subdir = path + Path.DirectorySeparatorChar + "hd" + x;
-                    if (Directory.Exists(subdir))
-                    {
-                        imageChecksum.HdNumber = "hd" + x;
-                        imageChecksum.Path = subdir;
-                        listPhysicalImageChecksums.Add(imageChecksum);
-                    }
-                    else
-                        break;
-                }
-
-                foreach (var hd in listPhysicalImageChecksums)
-                {
-                    var listChecksums = new List<FileChecksum>();
-
-                    var files = Directory.GetFiles(hd.Path, "*.*");
-                    foreach (var file in files)
-                    {
-                        var fc = new FileChecksum
-                        {
-                            FileName = Path.GetFileName(file),
-                            Checksum = Calculate_Hash(file)
-                        };
-                        listChecksums.Add(fc);
-                    }
-                    hd.Path = string.Empty;
-                    hd.Fc = listChecksums.ToArray();
-                }
-
-
-                var physicalImageJson = JsonConvert.SerializeObject(listPhysicalImageChecksums);
-                return physicalImageJson == image.Checksum;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.Message);
-                return false;
-            }
-        }
+        
 
         public static string TotalCount()
         {
@@ -273,9 +256,29 @@ namespace BLL
             }
         }
 
-        public static void Import()
+        public static int ImportCsv(string path)
         {
-            
+            var importCounter = 0;
+            using (var csv = new CsvReader(new StreamReader(path)))
+            {
+                csv.Configuration.RegisterClassMap<Models.ImageCsvMap>();
+                var records = csv.GetRecords<Models.Image>();
+                foreach (var image in records)
+                {
+                    if (AddImage(image).IsValid)
+                        importCounter++;
+                }
+            }
+            return importCounter;
+        }
+
+        public static void ExportCsv(string path)
+        {
+            using (var csv = new CsvWriter(new StreamWriter(path)))
+            {
+                csv.Configuration.RegisterClassMap<Models.ImageCsvMap>();
+                csv.WriteRecords(SearchImages());
+            }
         }
 
         public static Models.ValidationResult CheckApprovalAndChecksum(Models.Image image)
@@ -288,7 +291,14 @@ namespace BLL
                 return validationResult;
             }
 
-            if (Settings.RequireImageApproval == "true")
+            if (image.Enabled == 0)
+            {
+                validationResult.IsValid = false;
+                validationResult.Message = "Image Is Not Enabled";
+                return validationResult;
+            }
+
+            if (Settings.RequireImageApproval.ToLower() == "true")
             {
                 if (!Convert.ToBoolean(image.Approved))
                 {
@@ -298,12 +308,7 @@ namespace BLL
                 }
             }
 
-            if (!Check_Checksum(image))
-            {
-                validationResult.IsValid = false;
-                validationResult.Message = "Image Checksum Does Not Match Original";
-                return validationResult;
-            }
+          
 
             validationResult.IsValid = true;
             return validationResult;

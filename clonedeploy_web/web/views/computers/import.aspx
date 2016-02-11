@@ -1,13 +1,13 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/views/computers/computers.master" AutoEventWireup="true" Inherits="views.hosts.HostImport" CodeFile="import.aspx.cs" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/views/computers/computers.master" AutoEventWireup="true" Inherits="views.computers.ComputerImport" CodeFile="import.aspx.cs" %>
 <asp:Content ID="Breadcrumb" ContentPlaceHolderID="BreadcrumbSub" Runat="Server">
     <li>Import</li>
     </asp:Content>
 
 <asp:Content runat="server" ContentPlaceHolderID="Help">
-     <a href="<%= ResolveUrl("~/views/help/index.html")%>" class="submits actions" target="_blank">Help</a>
+     <a href="<%= ResolveUrl("~/views/help/index.html")%>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="SubPageActionsRight">
-   <asp:LinkButton ID="buttonImport" runat="server" Text="Upload" OnClick="ButtonImport_Click" CssClass="submits actions"/>
+   <asp:LinkButton ID="buttonImport" runat="server" Text="Upload" OnClick="ButtonImport_Click" CssClass="submits actions green"/>
 </asp:Content>
 
 <asp:Content ID="Content" ContentPlaceHolderID="SubContent" runat="Server">

@@ -1,8 +1,7 @@
-﻿using System.Collections.Generic;
-using System.Web.Security;
-using BLL;
+﻿using System;
+using System.Collections.Generic;
+using System.DirectoryServices.AccountManagement;
 using Helpers;
-using Models;
 using Newtonsoft.Json;
 
 namespace Security
@@ -14,8 +13,10 @@ namespace Security
     {
         public string ConsoleLogin(string username, string password, string task, string ip)
         {
-            var validationResult = GlobalLogin(username, password, "Console");
             var result = new Dictionary<string, string>();
+           
+            var validationResult = GlobalLogin(username, password, "Console");
+            
             if (!validationResult.IsValid)
             {
                 result.Add("valid", "false");
@@ -24,48 +25,36 @@ namespace Security
             }
             else
             {
-                var wdsuser = BLL.User.GetUser(username);
+                var cloneDeployUser = BLL.User.GetUser(username);
                 result.Add("valid", "true");
-                result.Add("user_id", wdsuser.Id.ToString());
-                result.Add("user_token", Settings.ServerKey);
+                result.Add("user_id", cloneDeployUser.Id.ToString());
+                result.Add("user_token", cloneDeployUser.Token);
             }
          
             return JsonConvert.SerializeObject(result);
-
-            //FIX ME
-            /*if ((task == "ond" && wdsuser.OndAccess == "1") || (task == "debug" && wdsuser.DebugAccess == "1") ||
-                (task == "diag" && wdsuser.DiagAccess == "1") || (task == "register") || (isWebTask == "push") ||
-                (isWebTask == "pull"))
-            {
-                    
-                   
-                return "true," + wdsuser.Id + "," + Settings.ServerKey;
-            }*/
-
-
-            return "false";
         }
 
-        private string CreatePasswordHash(string pwd, string salt)
-        {
-            var saltAndPwd = string.Concat(pwd, salt);
-            var hashedPwd = FormsAuthentication.HashPasswordForStoringInConfigFile(saltAndPwd, "sha1");
-            return hashedPwd;
-        }
+       
 
         public string IpxeLogin(string username, string password, string kernel, string bootImage, string task)
         {
-            //fix me
             var newLineChar = "\n";
-            var wdsKey = Settings.WebTaskRequiresLogin == "No" ? Settings.ServerKey : "";
-            var globalHostArgs = Settings.GlobalHostArgs;
+            string userToken = null;
+            if (Settings.DebugRequiresLogin == "No" || Settings.OnDemandRequiresLogin == "No" ||
+               Settings.RegisterRequiresLogin == "No" || Settings.WebTaskRequiresLogin == "No")
+                userToken = Settings.UniversalToken;
+            else
+            {
+                userToken = "";
+            }
+            var globalComputerArgs = Settings.GlobalComputerArgs;
             var validationResult = GlobalLogin(username, password, "iPXE");
             if (!validationResult.IsValid) return "goto Menu";
             var lines = "#!ipxe" + newLineChar;
             lines += "kernel " + Settings.WebPath + "IpxeBoot?filename=" + kernel + "&type=kernel" +
                      " initrd=" + bootImage + " root=/dev/ram0 rw ramdisk_size=127000 " + " web=" +
-                     Settings.WebPath + " WDS_KEY=" + wdsKey + " task=" + task + " consoleblank=0 " +
-                     globalHostArgs + newLineChar;
+                     Settings.WebPath + " USER_TOKEN=" + userToken + " task=" + task + " consoleblank=0 " +
+                     globalComputerArgs + newLineChar;
             lines += "imgfetch --name " + bootImage + " " + Settings.WebPath + "IpxeBoot?filename=" +
                      bootImage + "&type=bootimage" + newLineChar;
             lines += "boot";
@@ -75,32 +64,17 @@ namespace Security
 
         public Models.ValidationResult GlobalLogin(string userName, string password, string loginType)
         {
+            var tmp = Helpers.Utility.CreatePasswordHash("password", "salt");
+
             var validationResult = new Models.ValidationResult
             {
                 Message = "Login Was Not Successful",
                 IsValid = false
             };
 
-            //Check if user exists in CWDS
+            //Check if user exists in Clone Deploy
             var user = BLL.User.GetUser(userName);
             if (user == null) return validationResult;
-
-                //FIX ME
-                //Check against AD
-                /*
-                if (!string.IsNullOrEmpty(Settings.AdLoginDomain))
-                {
-                    var context = new PrincipalContext(ContextType.Domain, Settings.AdLoginDomain,
-                        userName, password);
-                    var adUser = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, userName);
-                    if (adUser != null) validated = true;
-                }
-                //Check against local DB
-                else
-                {
-                    var hash = CreatePasswordHash(password, user.Salt);
-                    if (user.Password == hash) validated = true;
-                }*/
 
             if (BLL.UserLockout.AccountIsLocked(user.Id))
             {
@@ -109,54 +83,40 @@ namespace Security
                 return validationResult;
             }
 
-            var hash = CreatePasswordHash(password, user.Salt);
-                if (user.Password == hash) validationResult.IsValid = true;
-            
+            //Check against AD
+            if (!string.IsNullOrEmpty(Settings.AdLoginDomain))
+            {
+                try
+                {
+                    var context = new PrincipalContext(ContextType.Domain, Settings.AdLoginDomain,
+                        userName, password);
+                    var adUser = UserPrincipal.FindByIdentity(context, IdentityType.SamAccountName, userName);
+                    if (adUser != null) validationResult.IsValid = true;
+                }
+                catch (Exception)
+                {
+                    //Fallback to local db in case ad auth isn't working
+                    var hash = Helpers.Utility.CreatePasswordHash(password, user.Salt);
+                    if (user.Password == hash) validationResult.IsValid = true;
 
+                }
+            }
+            //Check against local DB
+            else
+            {
+                var hash = Helpers.Utility.CreatePasswordHash(password, user.Salt);
+                if (user.Password == hash) validationResult.IsValid = true;
+            }
+           
             if (validationResult.IsValid)
             {
                 BLL.UserLockout.DeleteUserLockouts(user.Id);
-                var history = new History
-                {
-                    //Ip = ip,
-                    Event = "Successful " + loginType + " Login",
-                    Type = "User",
-                    EventUser = userName,
-                    TypeId = user.Id.ToString(),
-                    Notes = ""
-                };
-                //history.CreateEvent();
-
-                var mail = new Mail
-                {
-                    Subject = "Successful " + loginType+ " Login",
-                    Body = userName
-                };
-                mail.Send("Successful Login");
-
                 validationResult.Message = "Success";
                 return validationResult;
             }
             else
             {
                 BLL.UserLockout.ProcessBadLogin(user.Id);
-
-                var history = new History
-                {
-                    //Ip = ip,
-                    Event = "Failed " + loginType + " Login",
-                    Type = "User",
-                    EventUser = userName,
-                    Notes = password
-                };
-                //history.CreateEvent();
-
-                var mail = new Mail
-                {
-                    Subject = "Failed " + loginType + " Login",
-                    Body = userName
-                };
-                mail.Send("Failed Login");
                 return validationResult;
             }
         }

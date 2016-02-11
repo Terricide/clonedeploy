@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using Models;
+﻿using Models;
 
 namespace Tasks
 {
@@ -11,7 +9,7 @@ namespace Tasks
 
      
 
-        public void UpdateProgressPartition(string hostName, string partition)
+        public void UpdateProgressPartition(string computerName, string partition)
         {
             var activeTask = new ActiveImagingTask
             {

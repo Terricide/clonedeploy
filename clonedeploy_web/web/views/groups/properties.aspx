@@ -6,10 +6,10 @@
 </asp:Content>
 
 <asp:Content runat="server" ContentPlaceHolderID="Help">
-     <a href="<%= ResolveUrl("~/views/help/index.html")%>" class="submits actions" target="_blank">Help</a>
+     <a href="<%= ResolveUrl("~/views/help/index.html")%>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="SubPageActionsRight">
-      <asp:LinkButton ID="btnSubmit" runat="server" Text="Update Properties" OnClick="btnSubmit_OnClick" CssClass="submits actions"/>
+      <asp:LinkButton ID="btnSubmit" runat="server" Text="Update Properties" OnClick="btnSubmit_OnClick" CssClass="submits actions green"/>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="SubContent" Runat="Server">
@@ -30,7 +30,7 @@
         Image:
     </div>
     <div class="size-5 column">
-        <asp:DropDownList ID="ddlHostImage" runat="server" CssClass="ddlist" AutoPostBack="true" OnSelectedIndexChanged="ddlHostImage_OnSelectedIndexChanged"/>
+        <asp:DropDownList ID="ddlComputerImage" runat="server" CssClass="ddlist" AutoPostBack="true" OnSelectedIndexChanged="ddlComputerImage_OnSelectedIndexChanged"/>
    </div>
     <div class="size-4 column">
         <asp:CheckBox runat="server" Id="chkImage"/>
@@ -48,10 +48,10 @@
     </div>
     <br class="clear"/>
     <div class="size-4 column">
-        Host Description:
+        Computer Description:
     </div>
     <div class="size-5 column">
-        <asp:TextBox ID="txtHostDesc" runat="server" CssClass="descbox" TextMode="MultiLine"></asp:TextBox>
+        <asp:TextBox ID="txtComputerDesc" runat="server" CssClass="descbox" TextMode="MultiLine"></asp:TextBox>
     </div>
     <div class="size-4 column">
         <asp:CheckBox runat="server" Id="chkDescription"/>

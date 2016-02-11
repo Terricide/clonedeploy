@@ -14,34 +14,24 @@ namespace Helpers
             get { return Setting.GetSetting("Client Receiver Args").Value; }
         }
 
-        public static string CompressionAlgorithm
-        {
-            get { return Setting.GetSetting("Compression Algorithm").Value; }
-        }
-
-        public static string CompressionLevel
-        {
-            get { return Setting.GetSetting("Compression Level").Value; }
-        }
-
         public static string DebugRequiresLogin
         {
             get { return Setting.GetSetting("Debug Requires Login").Value; }
         }
 
-        public static string DefaultHostView
+        public static string DefaultComputerView
         {
-            get { return Setting.GetSetting("Default Host View").Value; }
+            get { return Setting.GetSetting("Default Computer View").Value; }
         }
 
         public static string DefaultKernel32
         {
-            get { return "3.19.3-WDS"; }
+            get { return "3.18.1"; }
         }
 
         public static string DefaultKernel64
         {
-            get { return "3.19.3x64-WDS"; }
+            get { return "3.18.1x64"; }
         }
 
         public static string EndPort
@@ -54,15 +44,12 @@ namespace Helpers
             get { return Setting.GetSetting("Force SSL").Value; }
         }
 
-        public static string GlobalHostArgs
+        public static string GlobalComputerArgs
         {
-            get { return Setting.GetSetting("Global Host Args").Value; }
+            get { return Setting.GetSetting("Global Computer Args").Value; }
         }
 
-        public static string ImageChecksum
-        {
-            get { return Setting.GetSetting("Image Checksum").Value; }
-        }
+        
 
         public static string PrimaryStoragePath
         {
@@ -128,17 +115,10 @@ namespace Helpers
             get { return Setting.GetSetting("Server IP").Value; }
         }
 
-        public static string ServerIpWithPort
+        public static string UniversalToken
         {
-            get { return Setting.GetServerIpWithPort(); }
+            get { return Setting.GetSetting("Universal Token").Value; }
         }
-
-        public static string ServerKey
-        {
-            get { return Setting.GetSetting("Server Key").Value; }
-        }
-
-      
 
         public static string StartPort
         {
@@ -182,7 +162,7 @@ namespace Helpers
 
         public static string SmtpPassword
         {
-            get { return Setting.GetSetting("Smtp Password").Value; }
+            get { return Setting.GetSetting("Smtp Password Encrypted").Value; }
         }
 
         public static string SmtpMailFrom
@@ -200,34 +180,9 @@ namespace Helpers
             get { return Setting.GetSetting("Smtp Ssl").Value; }
         }
 
-        public static string NotifySuccessfulLogin
+        public static string SmtpEnabled
         {
-            get { return Setting.GetSetting("Notify Successful Login").Value; }
-        }
-
-        public static string NotifyFailedLogin
-        {
-            get { return Setting.GetSetting("Notify Failed Login").Value; }
-        }
-
-        public static string NotifyTaskStarted
-        {
-            get { return Setting.GetSetting("Notify Task Started").Value; }
-        }
-
-        public static string NotifyTaskCompleted
-        {
-            get { return Setting.GetSetting("Notify Task Completed").Value; }
-        }
-
-        public static string NotifyImageApproved
-        {
-            get { return Setting.GetSetting("Notify Image Approved").Value; }
-        }
-
-        public static string NotifyResizeFailed
-        {
-            get { return Setting.GetSetting("Notify Resize Failed").Value; }
+            get { return Setting.GetSetting("Smtp Enabled").Value; }
         }
 
         public static string RequireImageApproval

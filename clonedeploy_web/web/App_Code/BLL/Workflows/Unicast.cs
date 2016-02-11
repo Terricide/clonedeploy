@@ -9,11 +9,13 @@ namespace BLL.Workflows
         private readonly string _direction;
         private Models.ActiveImagingTask _activeTask;
         private Models.ImageProfile _imageProfile;
+        private readonly int _userId;
 
-        public Unicast(Models.Computer computer, string direction)
+        public Unicast(Models.Computer computer, string direction, int userId)
         {
             _direction = direction;
             _computer = computer;
+            _userId = userId;
         }
 
         public string Start()
@@ -21,13 +23,19 @@ namespace BLL.Workflows
             if (_computer == null)
                 return "The Computer Does Not Exist";
 
-            _imageProfile = ImageProfile.ReadProfile(_computer.ImageProfile);
+            _imageProfile = ImageProfile.ReadProfile(_computer.ImageProfileId);
             if (_imageProfile == null) return "The Image Profile Does Not Exist";
 
             if (_imageProfile.Image == null) return "The Image Does Not Exist";
 
-            var validation = Image.CheckApprovalAndChecksum(_imageProfile.Image);
-            if (!validation.IsValid) return validation.Message;
+            if (_direction == "push")
+            {
+                var validation = Image.CheckApprovalAndChecksum(_imageProfile.Image);
+                if (!validation.IsValid) return validation.Message;
+            }
+
+            var dp = BLL.DistributionPoint.GetPrimaryDistributionPoint();
+            if (dp == null) return "Could Not Find A Primary Distribution Point";
 
             if (ActiveImagingTask.IsComputerActive(_computer.Id))
                 return "This Computer Is Already Part Of An Active Task";
@@ -36,7 +44,8 @@ namespace BLL.Workflows
             {
                 Type = "unicast",
                 ComputerId = _computer.Id,
-                Direction = _direction
+                Direction = _direction,
+                UserId = _userId
             };
 
             if (!ActiveImagingTask.AddActiveImagingTask(_activeTask))
@@ -57,7 +66,7 @@ namespace BLL.Workflows
 
             Utility.WakeUp(_computer.Mac);
 
-            return "Successfully Started Task";
+            return "Successfully Started Task For " + _computer.Name;
         }
     }
 }

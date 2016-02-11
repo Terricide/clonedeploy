@@ -1,15 +1,15 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/views/admin/Admin.master" AutoEventWireup="true" CodeFile="server.aspx.cs" Inherits="views_admin_server" %>
 
 <asp:Content ID="Breadcrumb" ContentPlaceHolderID="BreadcrumbSub" Runat="Server">
-    <li><a href="<%= ResolveUrl("~/views/admin/server.aspx") %>">Server Settings</a></li>
+    <li>Server Settings</li>
     </asp:Content>
 
 <asp:Content runat="server" ID="Help" ContentPlaceHolderID="Help">
-      <a href="<%= ResolveUrl("~/views/help/index.html")%>" class="submits actions" target="_blank">Help</a>
+      <a href="<%= ResolveUrl("~/views/help/index.html")%>" class="submits help" target="_blank"></a>
 </asp:Content>
 
 <asp:Content runat="server" ID="ActionsRight" ContentPlaceHolderID="SubPageActionsRight">
-    <asp:LinkButton ID="btnUpdateSettings" runat="server" Text="Update Server Settings" OnClick="btnUpdateSettings_OnClick" CssClass="submits actions"/>
+    <asp:LinkButton ID="btnUpdateSettings" runat="server" Text="Update Server Settings" OnClick="btnUpdateSettings_OnClick" CssClass="submits actions green"/>
 </asp:Content>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="SubContent" Runat="Server">
@@ -35,6 +35,13 @@
 
     <br class="clear"/>
 <div class="size-4 column">
+    Manual Override Web Service:
+</div>
+<div class="size-setting column">
+    <asp:CheckBox ID="chkOverride" runat="server" ></asp:CheckBox>
+</div>
+    <br class="clear"/>
+<div class="size-4 column">
     Web Service:
 </div>
 <div class="size-setting column">
@@ -53,11 +60,11 @@
 
 <div class="size-4 column">
     
-     Host View:
+     Computer View:
 </div>
 <div class="size-setting column ddl">
  
-    <asp:DropDownList ID="ddlHostView" runat="server" CssClass="ddlist" ClientIDMode="Static">
+    <asp:DropDownList ID="ddlComputerView" runat="server" CssClass="ddlist" ClientIDMode="Static">
         <asp:ListItem>all</asp:ListItem>
         <asp:ListItem>search</asp:ListItem>
     </asp:DropDownList>
@@ -74,9 +81,9 @@
         <div class="confirm-box-btns">
             <asp:LinkButton ID="OkButton" OnClick="OkButton_Click" runat="server" Text="Yes" CssClass="confirm_yes"/>
             <asp:LinkButton ID="CancelButton" runat="server" Text="No" CssClass="confirm_no"/>
-            <h5 style="color: white;">
-                <asp:Label ID="lblClientISO" runat="server" CssClass="modaltitle"></asp:Label>
-            </h5>
+            <br class="clear"/>
+                <asp:Label ID="lblClientISO" runat="server" CssClass="smalltext"></asp:Label>
+           
         </div>
     </div>
 

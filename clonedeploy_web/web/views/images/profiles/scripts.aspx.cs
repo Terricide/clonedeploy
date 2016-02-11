@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web.UI.WebControls;
 using BasePages;
-using BLL;
+using Helpers;
 
 public partial class views_images_profiles_scripts : Images
 {
@@ -26,7 +26,7 @@ public partial class views_images_profiles_scripts : Images
             if (dataKey == null) continue;
             foreach (var profileScript in profileScripts)
             {
-                if (profileScript.ScriptId == Convert.ToInt16(dataKey.Value))
+                if (profileScript.ScriptId == Convert.ToInt32(dataKey.Value))
                 {
                     pre.Checked = Convert.ToBoolean(profileScript.RunPre);
                     post.Checked = Convert.ToBoolean(profileScript.RunPost);
@@ -65,19 +65,23 @@ public partial class views_images_profiles_scripts : Images
 
     protected void btnUpdateScripts_OnClick(object sender, EventArgs e)
     {
-        BLL.ImageProfileScript.DeleteImageProfileScripts((ImageProfile.Id));
+        RequiresAuthorizationOrManagedImage(Authorizations.UpdateProfile, Image.Id);
+        var deleteResult = BLL.ImageProfileScript.DeleteImageProfileScripts((ImageProfile.Id));
+        var checkedCount = 0;
         foreach (GridViewRow row in gvScripts.Rows)
         {
             var pre = (CheckBox)row.FindControl("chkPre");
             var post = (CheckBox)row.FindControl("chkPost");
             if (pre == null || post == null) continue;
-            if(!pre.Checked && !post.Checked) continue;
+            if (!pre.Checked && !post.Checked) continue;
+            checkedCount++;
+
             var dataKey = gvScripts.DataKeys[row.RowIndex];
             if (dataKey == null) continue;
            
             var profileScript = new Models.ImageProfileScript()
             {
-                ScriptId = Convert.ToInt16(dataKey.Value),
+                ScriptId = Convert.ToInt32(dataKey.Value),
                 ProfileId = ImageProfile.Id,
                 RunPre = Convert.ToInt16(pre.Checked),
                 RunPost = Convert.ToInt16(post.Checked)
@@ -86,7 +90,13 @@ public partial class views_images_profiles_scripts : Images
             if(txtPriority != null)
                 if (!string.IsNullOrEmpty(txtPriority.Text))
                     profileScript.Priority = Convert.ToInt32(txtPriority.Text);
-            BLL.ImageProfileScript.AddImageProfileScript(profileScript);
+            EndUserMessage = BLL.ImageProfileScript.AddImageProfileScript(profileScript)
+                ? "Successfully Updated Image Profile"
+                : "Could Not Update Image Profile";
+        }
+        if (checkedCount == 0)
+        {
+            EndUserMessage = deleteResult ? "Successfully Updated Image Profile" : "Could Not Update Image Profile";
         }
     }
 }

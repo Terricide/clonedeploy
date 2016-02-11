@@ -23,6 +23,7 @@ public partial class views_admin_multicast : Admin
 
     protected void btnUpdateSettings_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorization(Authorizations.UpdateAdmin);
         if (ValidateSettings())
         {
             List<Setting> listSettings = new List<Setting>
@@ -61,13 +62,18 @@ public partial class views_admin_multicast : Admin
 
             if (BLL.Setting.UpdateSetting(listSettings))
             {
-                if ((string)(ViewState["startPort"]) != txtStartPort.Text)
+                EndUserMessage = "Successfully Updated Settings";
+                if ((string) (ViewState["startPort"]) != txtStartPort.Text)
                 {
                     var startPort = Convert.ToInt32(txtStartPort.Text);
                     startPort = startPort - 2;
-                    var port = new Port { Number = startPort };
+                    var port = new Port {Number = startPort};
                     BLL.Port.AddPort(port);
                 }
+            }
+            else
+            {
+                EndUserMessage = "Could Not Update Settings";
             }
         }
 
@@ -75,7 +81,7 @@ public partial class views_admin_multicast : Admin
 
     protected bool ValidateSettings()
     {
-        if (ActiveImagingTask.ReadAll().Count > 0)
+        if (ActiveImagingTask.AllActiveCountAdmin() > 0)
         {
             EndUserMessage = "Settings Cannot Be Changed While Tasks Are Active";
             return false;

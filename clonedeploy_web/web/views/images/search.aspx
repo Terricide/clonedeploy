@@ -5,10 +5,10 @@
     </asp:Content>
 
 <asp:Content runat="server" ContentPlaceHolderID="Help">
-     <a href="<%= ResolveUrl("~/views/help/index.html")%>" class="submits actions" target="_blank">Help</a>
+     <a href="<%= ResolveUrl("~/views/help/index.html")%>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="SubPageActionsRight">
-    <a class="confirm" href="#">Delete Selected Images</a>
+    <a class="confirm actions green" href="#">Delete Selected Images</a>
 </asp:Content>
 
 <asp:Content ID="Content" ContentPlaceHolderID="SubContent" runat="Server">
@@ -18,13 +18,14 @@
             $('#search').addClass("nav-current");
         });
     </script>
+    <p class="total">
+        <asp:Label ID="lblTotal" runat="server"></asp:Label>
+    </p>
     <div class="size-7 column">
         <asp:TextBox ID="txtSearch" runat="server" CssClass="searchbox" OnTextChanged="search_Changed"></asp:TextBox>
     </div>
     <br class="clear"/>
-    <p class="total">
-        <asp:Label ID="lblTotal" runat="server"></asp:Label>
-    </p>
+    
     <asp:GridView ID="gvImages" runat="server" AllowSorting="True" AutoGenerateColumns="False" OnSorting="gridView_Sorting" DataKeyNames="Id" CssClass="Gridview" AlternatingRowStyle-CssClass="alt">
         <Columns>
             <asp:TemplateField ShowHeader="False" ItemStyle-CssClass="width_30 mobi-hide-smaller" HeaderStyle-CssClass="mobi-hide-smaller">
@@ -45,7 +46,7 @@
                     <asp:CheckBox ID="chkSelector" runat="server"/>
                 </ItemTemplate>
             </asp:TemplateField>
-
+            <asp:HyperLinkField DataNavigateUrlFields="Id" DataNavigateUrlFormatString="~/views/images/edit.aspx?imageid={0}" Text="View" ItemStyle-CssClass="chkboxwidth"/>
             <asp:TemplateField>
                 <ItemTemplate>
                     <asp:HiddenField ID="HiddenID" runat="server" Value='<%# Bind("Id") %>'/>
@@ -60,7 +61,7 @@
             </asp:TemplateField>
          
 
-            <asp:HyperLinkField DataNavigateUrlFields="Id" DataNavigateUrlFormatString="~/views/images/edit.aspx?imageid={0}" Text="View"/>
+            
 
 
             <asp:TemplateField>

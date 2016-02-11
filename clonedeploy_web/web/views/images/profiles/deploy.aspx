@@ -2,16 +2,16 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="BreadcrumbSub2" Runat="Server">
     <li>
-        <a href="<%= ResolveUrl("~/views/images/profiles/chooser.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a>
+        <a href="<%= ResolveUrl("~/views/images/profiles/general.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a>
     </li>
     <li>Deploy Options</li>
 </asp:Content>
 
 <asp:Content runat="server" ContentPlaceHolderID="SubHelp">
-    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits actions" target="_blank">Help</a>
+    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="ActionsRightSub">
-    <asp:LinkButton ID="btnUpdateDeploy" runat="server" OnClick="btnUpdateDeploy_OnClick" Text="Update Deploy Options" CssClass="submits actions"/>
+    <asp:LinkButton ID="btnUpdateDeploy" runat="server" OnClick="btnUpdateDeploy_OnClick" Text="Update Deploy Options" CssClass="submits actions green" OnClientClick="update_click()"/>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="SubContent2" Runat="Server">
@@ -21,8 +21,15 @@
     });
 </script>
 
+    <div class="size-9 column">
+    Change Computer Name
+</div>
+<div class="size-8 column">
+    <asp:CheckBox ID="chkChangeName" runat="server" CssClass="textbox"></asp:CheckBox>
+</div>
+<br class="clear"/>
 <div class="size-9 column">
-    Don't Expand Volume
+    Don't Expand Volumes
 </div>
 <div class="size-8 column">
     <asp:CheckBox ID="chkDownNoExpand" runat="server" CssClass="textbox"></asp:CheckBox>
@@ -30,7 +37,7 @@
 <br class="clear"/>
 
 <div class="size-9 column">
-    Align BCD To Partition
+    Update BCD
 </div>
 <div class="size-8 column">
     <asp:CheckBox ID="chkAlignBCD" runat="server" CssClass="textbox"></asp:CheckBox>
@@ -38,7 +45,7 @@
 <br class="clear"/>
 
 <div class="size-9 column">
-    Run Fix Boot
+    Fix Bootloader
 </div>
 <div class="size-8 column">
     <asp:CheckBox ID="chkRunFixBoot" runat="server" CssClass="textbox"></asp:CheckBox>
@@ -52,7 +59,6 @@
         <asp:ListItem>Use Original MBR / GPT</asp:ListItem>
         <asp:ListItem>Dynamic</asp:ListItem>
         <asp:ListItem>Custom Script</asp:ListItem>
-        <asp:ListItem>Custom Layout</asp:ListItem>
     </asp:dropdownlist>
 </div>
 <br class="clear"/>
@@ -75,8 +81,10 @@
 </div>
 <br class="clear"/>
 
-<div class="full column">
-<div id="imageSchema" runat="server">
+<div id="imageSchema" runat="server" visible="false">
+    <div class="size-4 column">
+        <asp:LinkButton ID="lnkExport" runat="server" OnClick="lnkExport_OnClick" Text="Export Schema" CssClass="submits"/>
+    </div>
     <asp:GridView ID="gvHDs" runat="server" AutoGenerateColumns="false" CssClass="Gridview" AlternatingRowStyle-CssClass="alt">
         <Columns>
 
@@ -98,7 +106,7 @@
             <asp:BoundField DataField="Name" HeaderText="Name" ItemStyle-CssClass="width_100"></asp:BoundField>
             <asp:TemplateField ItemStyle-CssClass="width_50" HeaderText="Destination">
                 <ItemTemplate>
-                    <asp:TextBox ID="txtDestination" runat="server" Text='<%# Bind("Active") %>'/>
+                    <asp:TextBox ID="txtDestination" runat="server" Text='<%# Bind("Destination") %>'/>
                 </ItemTemplate>
             </asp:TemplateField>
             <asp:BoundField DataField="Size" HeaderText="Size (Reported / Usable)" ItemStyle-CssClass="width_200"></asp:BoundField>
@@ -122,7 +130,7 @@
                                             <asp:CheckBox ID="chkPartActive" runat="server" Checked='<%# Bind("Active") %>'/>
                                         </ItemTemplate>
                                     </asp:TemplateField>
-                                    <asp:BoundField DataField="Prefix" HeaderText="Pre" ItemStyle-CssClass="width_100"></asp:BoundField>
+                                  
                                     <asp:BoundField DataField="Number" HeaderText="#" ItemStyle-CssClass="width_100"></asp:BoundField>
 
                                     <asp:BoundField DataField="Size" HeaderText="Size" ItemStyle-CssClass="width_100"></asp:BoundField>
@@ -146,7 +154,7 @@
                                                     <asp:ListItem>MB</asp:ListItem>
                                                     <asp:ListItem>GB</asp:ListItem>
                                                     <asp:ListItem>%</asp:ListItem>
-                                                    <asp:ListItem>Fill</asp:ListItem>
+                                                   
                                                 </asp:DropDownList>
                                           
                                         </ItemTemplate>
@@ -244,7 +252,7 @@
                                                     <asp:ListItem>MB</asp:ListItem>
                                                     <asp:ListItem>GB</asp:ListItem>
                                                     <asp:ListItem>%</asp:ListItem>
-                                                    <asp:ListItem>Fill</asp:ListItem>
+                                                    
                                                 </asp:DropDownList>
                                           
                                         </ItemTemplate>
@@ -290,7 +298,7 @@
         </EmptyDataTemplate>
     </asp:GridView>
 </div>
-    </div>
+
 </div>
 
 <div id="customScript" runat="server">
@@ -333,7 +341,7 @@
                     <asp:CheckBox ID="chkSelector" runat="server"/>
                 </ItemTemplate>
             </asp:TemplateField>
-            <asp:BoundField DataField="Id" HeaderText="hostID" SortExpression="hostID" Visible="False"/>
+            <asp:BoundField DataField="Id" HeaderText="computerID" SortExpression="computerID" Visible="False"/>
             <asp:BoundField DataField="Name" HeaderText="Name" SortExpression="Name" ItemStyle-CssClass="width_200"></asp:BoundField>
             <asp:BoundField DataField="Table" HeaderText="Table" SortExpression="Table" ItemStyle-CssClass="width_200 mobi-hide-smallest" HeaderStyle-CssClass="mobi-hide-smallest"/>
             <asp:BoundField DataField="ImageEnvironment" HeaderText="Environment" SortExpression="ImageEnvironment" ItemStyle-CssClass="width_200 mobi-hide-smallest" HeaderStyle-CssClass="mobi-hide-smallest"/>
@@ -342,7 +350,7 @@
             <asp:HyperLinkField DataNavigateUrlFields="Id" DataNavigateUrlFormatString="~/views/global/partitions/edit.aspx?cat=sub1&layoutid={0}" Text="View"/>
         </Columns>
         <EmptyDataTemplate>
-            No Hosts Found
+            No Computers Found
         </EmptyDataTemplate>
     </asp:GridView>
 </div>

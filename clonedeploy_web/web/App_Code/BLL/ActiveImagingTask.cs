@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BLL.Workflows;
-using DAL;
 using Helpers;
 
 namespace BLL
@@ -39,6 +37,46 @@ namespace BLL
             }
         }
 
+        public static void SendTaskCompletedEmail(Models.ActiveImagingTask task)
+        {
+            //Mail not enabled
+            if (Settings.SmtpEnabled == "0") return;
+            task.Computer = BLL.Computer.GetComputer(task.ComputerId);
+            foreach (var user in BLL.User.SearchUsers("").Where(x => x.NotifyComplete == 1 && !string.IsNullOrEmpty(x.Email)))
+            {
+                if (task.UserId == user.Id)
+                {
+                    var mail = new Helpers.Mail
+                    {
+                        MailTo = user.Email,
+                        Body = task.Computer.Name + " Image Task Has Completed.",
+                        Subject = "Task Completed"
+                    };
+                    mail.Send();
+                }
+            }
+        }
+
+        public static void SendTaskErrorEmail(Models.ActiveImagingTask task, string error)
+        {
+            //Mail not enabled
+            if (Settings.SmtpEnabled == "0") return;
+            task.Computer = BLL.Computer.GetComputer(task.ComputerId);
+            foreach (var user in BLL.User.SearchUsers("").Where(x => x.NotifyError == 1 && !string.IsNullOrEmpty(x.Email)))
+            {
+                if (task.UserId == user.Id)
+                {
+                    var mail = new Helpers.Mail
+                    {
+                        MailTo = user.Email,
+                        Body = task.Computer.Name + " Image Task Has Failed. " + error,
+                        Subject = "Task Failed"
+                    };
+                    mail.Send();
+                }
+            }
+        }
+
         public static bool AddActiveImagingTask(Models.ActiveImagingTask activeImagingTask)
         {
             using (var uow = new DAL.UnitOfWork())
@@ -70,8 +108,13 @@ namespace BLL
         {
             using (var uow = new DAL.UnitOfWork())
             {
-                return uow.ActiveImagingTaskRepository.Get(t => t.MulticastId == multicastId,
+                var activeImagingTasks = uow.ActiveImagingTaskRepository.Get(t => t.MulticastId == multicastId,
                     orderBy: q => q.OrderBy(t => t.ComputerId));
+                foreach (var task in activeImagingTasks)
+                {
+                    task.Computer = BLL.Computer.GetComputer(task.ComputerId);
+                }
+                return activeImagingTasks;
             }
         }
 
@@ -83,20 +126,72 @@ namespace BLL
             }
         }
 
-        public static List<Models.ActiveImagingTask> ReadAll()
+        public static List<Models.ActiveImagingTask> ReadAll(int userId)
         {
+
             using (var uow = new DAL.UnitOfWork())
             {
-                return uow.ActiveImagingTaskRepository.Get(orderBy: q => q.OrderBy(t => t.Id));
+                //Admins see all tasks
+                var activeImagingTasks = BLL.User.IsAdmin(userId)
+                    ? uow.ActiveImagingTaskRepository.Get(orderBy: q => q.OrderBy(t => t.Id))
+                    : uow.ActiveImagingTaskRepository.Get(x => x.UserId == userId, orderBy: q => q.OrderBy(t => t.Id));
+                foreach (var task in activeImagingTasks)
+                {
+                    task.Computer = BLL.Computer.GetComputer(task.ComputerId);
+                }
+                return activeImagingTasks;
             }
         }
 
-        public static List<Models.ActiveImagingTask> ReadUnicasts()
+        public static string ActiveUnicastCount(int userId)
         {
             using (var uow = new DAL.UnitOfWork())
             {
-                return uow.ActiveImagingTaskRepository.Get(t => t.Type == "unicast",
-                    orderBy: q => q.OrderBy(t => t.ComputerId));
+                return BLL.User.IsAdmin(userId)
+                    ? uow.ActiveImagingTaskRepository.Count(t => t.Type == "unicast")
+                    : uow.ActiveImagingTaskRepository.Count(t => t.Type == "unicast" && t.UserId == userId);
+            }
+        }
+
+        public static string AllActiveCount(int userId)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                return BLL.User.IsAdmin(userId)
+                    ? uow.ActiveImagingTaskRepository.Count()
+                    : uow.ActiveImagingTaskRepository.Count(x => x.UserId == userId);
+            }
+        }
+
+        public static int AllActiveCountAdmin()
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                return Convert.ToInt32(uow.ActiveImagingTaskRepository.Count());
+            }
+        }
+
+        public static List<Models.ActiveImagingTask> ReadUnicasts(int userId)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                //Admins see all tasks
+                List<Models.ActiveImagingTask> activeImagingTasks;
+                if (BLL.User.IsAdmin(userId))
+                {
+                    activeImagingTasks = uow.ActiveImagingTaskRepository.Get(t => t.Type == "unicast",
+                        orderBy: q => q.OrderBy(t => t.ComputerId));
+                }
+                else
+                {
+                    activeImagingTasks = uow.ActiveImagingTaskRepository.Get(t => t.Type == "unicast" && t.UserId == userId,
+                        orderBy: q => q.OrderBy(t => t.ComputerId));
+                }
+                foreach (var task in activeImagingTasks)
+                {
+                    task.Computer = BLL.Computer.GetComputer(task.ComputerId);
+                }
+                return activeImagingTasks;
             }
         }
 

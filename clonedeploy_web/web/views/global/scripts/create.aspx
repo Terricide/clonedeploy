@@ -1,14 +1,14 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/views/global/scripts/scripts.master" AutoEventWireup="true" CodeFile="create.aspx.cs" Inherits="views_admin_scripts_create" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/views/global/scripts/scripts.master" AutoEventWireup="true" CodeFile="create.aspx.cs" Inherits="views_admin_scripts_create" ValidateRequestMode="Disabled" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="BreadcrumbSub2" Runat="Server">
     <li>New Script</li>
 </asp:Content>
 
 <asp:Content ID="Content3" ContentPlaceHolderID="SubHelp" Runat="Server">
-    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits actions" target="_blank">Help</a>
+    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content ID="Content4" ContentPlaceHolderID="ActionsRightSub" Runat="Server">
-     <asp:LinkButton ID="btnSubmit" runat="server" OnClick="btnSubmit_OnClick" Text="Add Script" CssClass="submits actions" OnClientClick="update_click()"/>
+     <asp:LinkButton ID="btnSubmit" runat="server" OnClick="btnSubmit_OnClick" Text="Add Script" CssClass="submits actions green" OnClientClick="update_click()"/>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="SubContent2" Runat="Server">

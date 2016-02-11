@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Data.Linq.Mapping;
 using BasePages;
 using Helpers;
 using Models;
-using Security;
 
 namespace views.images
 {
@@ -19,14 +17,16 @@ namespace views.images
 
         protected void btnSubmit_Click(object sender, EventArgs e)
         {
+            RequiresAuthorization(Authorizations.CreateImage);
             var image = new Image
             {
                 Name = txtImageName.Text,
-                Os = ddlImageOS.Text,
+                Os = "",
                 Description = txtImageDesc.Text,
                 Protected = chkProtected.Checked ? 1 : 0,
                 IsVisible = chkVisible.Checked ? 1 : 0,
-                Type = ddlImageType.Text
+                Type = ddlImageType.Text,
+                Enabled = 1
             };
 
            

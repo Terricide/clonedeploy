@@ -5,6 +5,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using BasePages;
 using BLL;
+using Helpers;
 using Newtonsoft.Json;
 
 public partial class views_images_profiles_deploy : Images
@@ -13,6 +14,7 @@ public partial class views_images_profiles_deploy : Images
     {
         if (IsPostBack) return;
         chkDownNoExpand.Checked = Convert.ToBoolean(ImageProfile.SkipExpandVolumes);
+        chkChangeName.Checked = Convert.ToBoolean(ImageProfile.ChangeName);
         chkAlignBCD.Checked = Convert.ToBoolean(ImageProfile.FixBcd);
         chkRunFixBoot.Checked = Convert.ToBoolean(ImageProfile.FixBootloader);
         ddlPartitionMethod.Text = ImageProfile.PartitionMethod;
@@ -21,7 +23,9 @@ public partial class views_images_profiles_deploy : Images
 
     protected void btnUpdateDeploy_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorizationOrManagedImage(Authorizations.UpdateProfile, Image.Id);
         var imageProfile = ImageProfile;
+        imageProfile.ChangeName = Convert.ToInt16(chkChangeName.Checked);
         imageProfile.SkipExpandVolumes = Convert.ToInt16(chkDownNoExpand.Checked);
         imageProfile.FixBcd = Convert.ToInt16(chkAlignBCD.Checked);
         imageProfile.FixBootloader = Convert.ToInt16(chkRunFixBoot.Checked);
@@ -47,7 +51,7 @@ public partial class views_images_profiles_deploy : Images
                     if (dataKey == null) continue;
                     var profilePartitionLayout = new Models.ImageProfilePartitionLayout()
                     {
-                        LayoutId = Convert.ToInt16(dataKey.Value),
+                        LayoutId = Convert.ToInt32(dataKey.Value),
                         ProfileId = ImageProfile.Id
                     };
                     BLL.ImageProfilePartition.AddImageProfilePartition(profilePartitionLayout);
@@ -57,7 +61,8 @@ public partial class views_images_profiles_deploy : Images
                 imageProfile.CustomPartitionScript = "";
                 break;
         }
-        BLL.ImageProfile.UpdateProfile(imageProfile);
+        var result = BLL.ImageProfile.UpdateProfile(imageProfile);
+        EndUserMessage = result.IsValid ? "Successfully Updated Image Profile" : result.Message;
     }
 
 
@@ -101,7 +106,7 @@ public partial class views_images_profiles_deploy : Images
                     if (dataKey == null) continue;
                     foreach (var profilePartitionLayout in profilePartitionLayouts)
                     {
-                        if (profilePartitionLayout.LayoutId == Convert.ToInt16(dataKey.Value))
+                        if (profilePartitionLayout.LayoutId == Convert.ToInt32(dataKey.Value))
                             cb.Checked = true;
                     }
                 }
@@ -238,11 +243,13 @@ public partial class views_images_profiles_deploy : Images
     {
         if (chkModifySchema.Checked)
         {
+            chkDownForceDynamic.Checked = true;
             imageSchema.Visible = true;
             PopulateHardDrives();
         }
         else
         {
+            chkDownForceDynamic.Checked = false;
             imageSchema.Visible = false;
         }
     }
@@ -258,8 +265,11 @@ public partial class views_images_profiles_deploy : Images
             if(box != null)
             schema.HardDrives[rowCounter].Active = box.Checked;
 
-            var gvParts = (GridView)row.FindControl("gvParts");
+            var txtDestination = row.FindControl("txtDestination") as TextBox;
+            if(txtDestination != null)
+                schema.HardDrives[rowCounter].Destination = txtDestination.Text;
 
+            var gvParts = (GridView)row.FindControl("gvParts");
             var partCounter = 0;
             foreach (GridViewRow partRow in gvParts.Rows)
             {
@@ -311,5 +321,18 @@ public partial class views_images_profiles_deploy : Images
         }
         return JsonConvert.SerializeObject(schema, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
        
+    }
+
+    protected void lnkExport_OnClick(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(ImageProfile.CustomSchema))
+            EndUserMessage = "You Must Update The Schema First";
+        else
+        {
+            Response.ContentType = "text/plain";
+            Response.AppendHeader("Content-Disposition", "attachment; filename=schema.txt");
+            Response.Write(ImageProfile.CustomSchema);
+            Response.End();
+        }
     }
 }

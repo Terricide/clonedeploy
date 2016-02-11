@@ -47,9 +47,15 @@ namespace Models
         public string Type { get; set; }
 
         [Column("multicast_id", Order = 12)]
-        public int MulticastId { get; set; } 
+        public int MulticastId { get; set; }
+
+        [Column("user_id", Order = 13)]
+        public int UserId { get; set; } 
 
         [NotMapped]
         public string Direction { get; set; }
+
+        [NotMapped]
+        public virtual Models.Computer Computer { get; set; }
     }
 }

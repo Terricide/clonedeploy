@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Models;
 
@@ -6,11 +7,11 @@ namespace BLL
 {
     public class Authorize
     {
-        private readonly WdsUser _cloneDeployUser;
+        private readonly CloneDeployUser _cloneDeployUser;
         private readonly List<string> _currentUserRights;
         private readonly string _requiredRight;
 
-        public Authorize(WdsUser user, string requiredRight )
+        public Authorize(CloneDeployUser user, string requiredRight )
         {
             _cloneDeployUser = user;
             _currentUserRights = BLL.UserRight.Get(_cloneDeployUser.Id).Select(right => right.Right).ToList();
@@ -34,11 +35,13 @@ namespace BLL
             if (userGroupManagements.Count > 0)
             {
                 //Group management is in use since at least 1 result was returned.  Now check if allowed
-                var computers = BLL.Computer.SearchComputersForUser(_cloneDeployUser.Id);
+                var computers = BLL.Computer.SearchComputersForUser(_cloneDeployUser.Id,Int32.MaxValue);
                 return computers.Any(x => x.Id == computerId);
             }
-
-            return false;
+            else //Group management is not in use, use the global rights for the user
+            {
+                return IsAuthorized();
+            }
         }
 
         public bool GroupManagement(int groupId)
@@ -54,8 +57,10 @@ namespace BLL
                 //Group management is in use since at least 1 result was returned.  Now check if allowed
                 return BLL.Group.SearchGroupsForUser(_cloneDeployUser.Id).Any(x => x.Id == groupId);
             }
-
-            return false;
+            else //Group management is not in use, use the global rights for the user
+            {
+                return IsAuthorized();
+            }
         }
 
         public bool ImageManagement(int imageId)
@@ -68,11 +73,13 @@ namespace BLL
             var userImageManagements = BLL.UserImageManagement.Get(_cloneDeployUser.Id);
             if (userImageManagements.Count > 0)
             {
-                //Group management is in use since at least 1 result was returned.  Now check if allowed
+                //Image management is in use since at least 1 result was returned.  Now check if allowed
                 return BLL.Image.SearchImagesForUser(_cloneDeployUser.Id).Any(x => x.Id == imageId);
             }
-
-            return false;
+            else //Image management is not in use, use the global rights for the user
+            {
+                return IsAuthorized();
+            }
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 
 namespace BLL
 {
@@ -30,6 +29,15 @@ namespace BLL
             using (var uow = new DAL.UnitOfWork())
             {
                 return uow.UserImageManagementRepository.Get(x => x.UserId == userId);
+            }
+        }
+
+        public static bool DeleteImage(int imageId)
+        {
+            using (var uow = new DAL.UnitOfWork())
+            {
+                uow.UserImageManagementRepository.DeleteRange(x => x.ImageId == imageId);
+                return uow.Save();
             }
         }
     }

@@ -10,7 +10,7 @@ namespace BasePages
 {
     public class PageBaseMaster : Page
     {
-        public Models.WdsUser CloneDeployCurrentUser;
+        public Models.CloneDeployUser CloneDeployCurrentUser;
         public List<string> CurrentUserRights;
 
         public static string EndUserMessage
@@ -32,7 +32,7 @@ namespace BasePages
                 Response.Redirect("~/views/login/login.aspx?session=expired", true);
             }
 
-            CloneDeployCurrentUser = (Models.WdsUser)currentUser;
+            CloneDeployCurrentUser = (Models.CloneDeployUser)currentUser;
 
 
         }
@@ -128,7 +128,7 @@ namespace BasePages
         public string GetSortDirection(string sortExpression)
         {
             if (ViewState[sortExpression] == null)
-                ViewState[sortExpression] = "Desc";
+                ViewState[sortExpression] = "Asc";
             else
                 ViewState[sortExpression] = ViewState[sortExpression].ToString() == "Desc" ? "Asc" : "Desc";
 

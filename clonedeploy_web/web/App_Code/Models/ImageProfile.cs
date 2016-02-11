@@ -80,6 +80,18 @@ namespace Models
         [Column("upload_schema_only", Order = 24)]
         public int UploadSchemaOnly { get; set; }
 
+        [Column("multicast_sender_arguments", Order = 25)]
+        public string SenderArguments { get; set; }
+
+        [Column("multicast_receiver_arguments", Order = 26)]
+        public string ReceiverArguments { get; set; }
+
+        [Column("web_cancel", Order = 27)]
+        public int WebCancel { get; set; }
+
+        [Column("change_name", Order = 28)]
+        public int ChangeName { get; set; }
+
         [NotMapped]
         public virtual Models.Image Image { get; set; }
 

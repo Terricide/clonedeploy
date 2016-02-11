@@ -1,15 +1,15 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/views/images/profiles/profiles.master" AutoEventWireup="true" CodeFile="general.aspx.cs" Inherits="views_images_profiles_general" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="BreadcrumbSub2" Runat="Server">
-    <li><a href="<%= ResolveUrl("~/views/images/profiles/chooser.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a></li>
+    <li><a href="<%= ResolveUrl("~/views/images/profiles/general.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a></li>
     <li>General</li>
 </asp:Content>
 
 <asp:Content runat="server" ContentPlaceHolderID="SubHelp">
-    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits actions" target="_blank">Help</a>
+    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="ActionsRightSub">
-      <asp:LinkButton ID="buttonUpdateGeneral" runat="server" OnClick="buttonUpdateGeneral_OnClick" Text="Update General" CssClass="submits actions" />
+      <asp:LinkButton ID="buttonUpdateGeneral" runat="server" OnClick="buttonUpdateGeneral_OnClick" Text="Update Profile" CssClass="submits actions green" />
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="SubContent2" Runat="Server">

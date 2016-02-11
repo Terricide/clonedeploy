@@ -1,15 +1,15 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/views/images/profiles/profiles.master" AutoEventWireup="true" CodeFile="pxe.aspx.cs" Inherits="views_images_profiles_pxe" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="BreadcrumbSub2" Runat="Server">
-     <li><a href="<%= ResolveUrl("~/views/images/profiles/chooser.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a></li>
+     <li><a href="<%= ResolveUrl("~/views/images/profiles/general.aspx") %>?imageid=<%= Image.Id %>&profileid=<%= ImageProfile.Id %>&cat=profiles"><%= ImageProfile.Name %></a></li>
     <li>PXE Boot Options</li>
 </asp:Content>
 
 <asp:Content runat="server" ContentPlaceHolderID="SubHelp">
-    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits actions" target="_blank">Help</a>
+    <a href="<%= ResolveUrl("~/views/help/index.html") %>" class="submits help" target="_blank"></a>
 </asp:Content>
 <asp:Content runat="server" ContentPlaceHolderID="ActionsRightSub">
-     <asp:LinkButton ID="buttonUpdatePXE" runat="server" OnClick="buttonUpdatePXE_OnClick" Text="Update PXE Boot Options" CssClass="submits actions"/>
+     <asp:LinkButton ID="buttonUpdatePXE" runat="server" OnClick="buttonUpdatePXE_OnClick" Text="Update PXE Boot Options" CssClass="submits actions green"/>
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="SubContent2" Runat="Server">
      <script type="text/javascript">

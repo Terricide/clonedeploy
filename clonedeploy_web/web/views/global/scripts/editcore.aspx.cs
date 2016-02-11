@@ -7,6 +7,7 @@ public partial class views_admin_scripts_editcore : BasePages.Global
 {
     protected void Page_Load(object sender, EventArgs e)
     {
+        RequiresAuthorization(Authorizations.Administrator);
         if (IsPostBack) return;
         scriptEditor.Value = "";
         ddlCoreScripts.DataSource = Utility.GetScripts("core");
@@ -18,8 +19,8 @@ public partial class views_admin_scripts_editcore : BasePages.Global
     {
         scriptEditor.Value = "";
         if (ddlCoreScripts.Text == "Select A Script") return;
-        var path = HttpContext.Current.Server.MapPath("~") + Path.DirectorySeparatorChar + "data" +
-                    Path.DirectorySeparatorChar + "clientscripts" + Path.DirectorySeparatorChar + "core" + Path.DirectorySeparatorChar + ddlCoreScripts.Text;
+        var path = HttpContext.Current.Server.MapPath("~") + Path.DirectorySeparatorChar + "private" +
+                    Path.DirectorySeparatorChar + "clientscripts" + Path.DirectorySeparatorChar + ddlCoreScripts.Text;
 
 
         scriptEditor.Value = File.ReadAllText(path);
@@ -27,8 +28,8 @@ public partial class views_admin_scripts_editcore : BasePages.Global
 
     protected void buttonSaveCore_OnClick(object sender, EventArgs e)
     {
-        var path = HttpContext.Current.Server.MapPath("~") + Path.DirectorySeparatorChar + "data" +
-                   Path.DirectorySeparatorChar + "clientscripts" + Path.DirectorySeparatorChar + "core" + Path.DirectorySeparatorChar + ddlCoreScripts.Text;
+        var path = HttpContext.Current.Server.MapPath("~") + Path.DirectorySeparatorChar + "private" +
+                   Path.DirectorySeparatorChar + "clientscripts" + Path.DirectorySeparatorChar + ddlCoreScripts.Text;
 
         var fixedLineEnding = scriptEditor.Value.Replace("\r\n", "\n");
         File.WriteAllText(path, fixedLineEnding);

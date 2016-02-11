@@ -4,8 +4,7 @@ using System.Linq;
 using System.Web.UI;
 using System.Web.UI.WebControls;
 using BasePages;
-using BLL;
-using Models;
+using Helpers;
 
 
 public partial class views_images_profiles_search : Images
@@ -19,15 +18,18 @@ public partial class views_images_profiles_search : Images
 
     protected void ButtonConfirmDelete_Click(object sender, EventArgs e)
     {
+        RequiresAuthorization(Authorizations.DeleteProfile);
+        var deleteCounter = 0;
         foreach (GridViewRow row in gvProfiles.Rows)
         {
             var cb = (CheckBox)row.FindControl("chkSelector");
             if (cb == null || !cb.Checked) continue;
             var dataKey = gvProfiles.DataKeys[row.RowIndex];
             if (dataKey == null) continue;
-            BLL.ImageProfile.DeleteProfile(Convert.ToInt32(dataKey.Value));
+            if (BLL.ImageProfile.DeleteProfile(Convert.ToInt32(dataKey.Value)))
+                deleteCounter++;
         }
-
+        EndUserMessage = "Successfully Deleted " + deleteCounter + " Profiles";
         PopulateGrid();
     }
 

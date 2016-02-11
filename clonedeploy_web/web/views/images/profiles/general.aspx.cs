@@ -1,5 +1,6 @@
 ﻿using System;
 using BasePages;
+using Helpers;
 
 public partial class views_images_profiles_general : Images
 {
@@ -16,8 +17,11 @@ public partial class views_images_profiles_general : Images
 
     protected void buttonUpdateGeneral_OnClick(object sender, EventArgs e)
     {
+        RequiresAuthorizationOrManagedImage(Authorizations.UpdateProfile, Image.Id);
         var imageProfile = ImageProfile;
         imageProfile.Name = txtProfileName.Text;
-        BLL.ImageProfile.UpdateProfile(imageProfile);
+        imageProfile.Description = txtProfileDesc.Text;
+        var result = BLL.ImageProfile.UpdateProfile(imageProfile);
+        EndUserMessage = result.IsValid ? "Successfully Updated Image Profile" : result.Message;
     }
 }
